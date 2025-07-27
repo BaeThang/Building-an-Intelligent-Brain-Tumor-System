@@ -403,8 +403,7 @@ Dự án này được phân phối dưới giấy phép MIT. Xem file [LICENSE]
 
 Nếu bạn có câu hỏi hoặc cần hỗ trợ:
 - Tạo Issue trên GitHub
-- Email: [your-email@example.com]
-- LinkedIn: [Your LinkedIn Profile]
+- Email: [thangtnq2802@gmail.com]
 
 ## 🚀 Roadmap
 
