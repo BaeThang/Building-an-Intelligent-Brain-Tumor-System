@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}Phân Tích Tiên Lượng Sống Còn | Hệ Thống Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Phân Tích Tiên Lượng Sống Còn{% endblock %}
+{% block hero_subtitle %}Phân tích khả năng sống còn dựa trên phương pháp điều trị và loại khối u{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">Phân Tích Tiên Lượng</h6>
+        <h1 class="mb-5">Tiên Lượng Sống Còn</h1>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Tổng quan -->
+        <div class="col-lg-12 col-md-12 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="card border-primary mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa fa-chart-bar me-2"></i>Tổng Quan Dữ Liệu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <h4 class="mb-2">Số Bệnh Nhân Có Dữ Liệu Sống Còn</h4>
+                            <h1 class="display-4 text-primary mb-4">{{ patients_count }}</h1>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="lead">Phân tích tiên lượng sống còn dựa trên hai yếu tố chính:</p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <i class="fa fa-check-circle text-success me-2"></i>
+                                    <strong>Cấp độ khối u (Grade):</strong> HGG (High-Grade Glioma) và LGG (Low-Grade Glioma)
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fa fa-check-circle text-success me-2"></i>
+                                    <strong>Mức độ phẫu thuật (Extent of Resection):</strong> GTR (Gross Total Resection), STR (Subtotal Resection), và các phương pháp khác
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-3">
+        <!-- Phân tích theo phương pháp phẫu thuật -->
+        <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fa fa-scissors me-2"></i>Theo Phương Pháp Phẫu Thuật</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="resectionChart" height="300"></canvas>
+                    <div class="table-responsive mt-4">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Phương Pháp Phẫu Thuật</th>
+                                    <th>Số Bệnh Nhân</th>
+                                    <th>Trung Bình Ngày Sống Còn</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resection, days in resection_groups.items() %}
+                                <tr>
+                                    <td>{{ resection }}</td>
+                                    <td>{{ days|length }}</td>
+                                    <td>{{ avg_survival[resection]|round|int }} ngày</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <p class="mb-0">
+                        <i class="fa fa-info-circle text-primary me-2"></i>
+                        <span class="text-muted"><strong>GTR</strong> (Gross Total Resection): Cắt bỏ hoàn toàn khối u có thể nhìn thấy.</span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="fa fa-info-circle text-primary me-2"></i>
+                        <span class="text-muted"><strong>STR</strong> (Subtotal Resection): Cắt bỏ một phần khối u.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân tích theo cấp độ khối u -->
+        <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fa fa-brain me-2"></i>Theo Cấp Độ Khối U</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="gradeChart" height="300"></canvas>
+                    <div class="table-responsive mt-4">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Cấp Độ Khối U</th>
+                                    <th>Số Bệnh Nhân</th>
+                                    <th>Trung Bình Ngày Sống Còn</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade, days in grade_groups.items() %}
+                                <tr>
+                                    <td>{{ grade }}</td>
+                                    <td>{{ days|length }}</td>
+                                    <td>{{ avg_grade_survival[grade]|round|int }} ngày</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <p class="mb-0">
+                        <i class="fa fa-info-circle text-primary me-2"></i>
+                        <span class="text-muted"><strong>HGG</strong> (High-Grade Glioma): Khối u độ cao, phát triển nhanh và xâm lấn.</span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="fa fa-info-circle text-primary me-2"></i>
+                        <span class="text-muted"><strong>LGG</strong> (Low-Grade Glioma): Khối u độ thấp, phát triển chậm.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân tích chi tiết -->
+    <div class="row g-4 mt-5 mb-5 wow fadeInUp" data-wow-delay="0.7s">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fa fa-chart-line me-2"></i>Phân Tích Chi Tiết - Tiên Lượng Sống Còn Theo Nhóm</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="combinedChart" height="400"></canvas>
+                    
+                    <div class="row mt-5">
+                        <div class="col-md-6">
+                            <h5 class="text-center mb-3">Phân Bố Số Ngày Sống Còn</h5>
+                            <canvas id="survivalDistribution" height="300"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-center mb-3">So Sánh Hiệu Quả Điều Trị</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Nhóm</th>
+                                            <th>Hiệu Quả</th>
+                                            <th>Ghi Chú</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for grade, days in grade_groups.items() %}
+                                            {% for resection, days2 in resection_groups.items() %}
+                                                {% if grade != "Unknown" and resection != "Unknown" %}
+                                                <tr>
+                                                    <td><strong>{{ grade }}</strong> + {{ resection }}</td>
+                                                    <td>
+                                                        {% set effectiveness = 0 %}
+                                                        {% if grade == "LGG" %}
+                                                            {% set effectiveness = 4 %}
+                                                        {% elif grade == "HGG" %}
+                                                            {% if resection == "GTR" %}
+                                                                {% set effectiveness = 3 %}
+                                                            {% else %}
+                                                                {% set effectiveness = 2 %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        
+                                                        {% for i in range(effectiveness) %}
+                                                            <i class="fa fa-star text-warning"></i>
+                                                        {% endfor %}
+                                                        {% for i in range(5 - effectiveness) %}
+                                                            <i class="fa fa-star text-muted"></i>
+                                                        {% endfor %}
+                                                    </td>
+                                                    <td>
+                                                        {% if grade == "LGG" and resection == "GTR" %}
+                                                            Tiên lượng tốt nhất
+                                                        {% elif grade == "LGG" and resection == "STR" %}
+                                                            Tiên lượng khá tốt
+                                                        {% elif grade == "HGG" and resection == "GTR" %}
+                                                            Tiên lượng trung bình
+                                                        {% elif grade == "HGG" and resection == "STR" %}
+                                                            Tiên lượng kém
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <p class="mb-0"><i class="fa fa-exclamation-triangle text-warning me-2"></i>Lưu ý: Các phân tích này chỉ dựa trên dữ liệu có sẵn và nên được tham khảo cùng với đánh giá chi tiết của bác sĩ.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dữ liệu cho biểu đồ phương pháp phẫu thuật
+        const resectionCtx = document.getElementById('resectionChart').getContext('2d');
+        const resectionLabels = [{% for resection in resection_groups.keys() %}'{{ resection }}',{% endfor %}];
+        const resectionData = [{% for resection, days in resection_groups.items() %}{{ avg_survival[resection] }},{% endfor %}];
+        const resectionCounts = [{% for resection, days in resection_groups.items() %}{{ days|length }},{% endfor %}];
+        
+        new Chart(resectionCtx, {
+            type: 'bar',
+            data: {
+                labels: resectionLabels,
+                datasets: [{
+                    label: 'Trung bình số ngày sống còn',
+                    data: resectionData,
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(23, 162, 184, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(23, 162, 184, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                return `Số bệnh nhân: ${resectionCounts[index]}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Số ngày'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Phương pháp phẫu thuật'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Dữ liệu cho biểu đồ cấp độ khối u
+        const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+        const gradeLabels = [{% for grade in grade_groups.keys() %}'{{ grade }}',{% endfor %}];
+        const gradeData = [{% for grade, days in grade_groups.items() %}{{ avg_grade_survival[grade] }},{% endfor %}];
+        const gradeCounts = [{% for grade, days in grade_groups.items() %}{{ days|length }},{% endfor %}];
+        
+        new Chart(gradeCtx, {
+            type: 'bar',
+            data: {
+                labels: gradeLabels,
+                datasets: [{
+                    label: 'Trung bình số ngày sống còn',
+                    data: gradeData,
+                    backgroundColor: [
+                        'rgba(23, 162, 184, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(23, 162, 184, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                return `Số bệnh nhân: ${gradeCounts[index]}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Số ngày'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Cấp độ khối u'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Biểu đồ kết hợp
+        const combinedCtx = document.getElementById('combinedChart').getContext('2d');
+        
+        // Tạo một biểu đồ kết hợp
+        new Chart(combinedCtx, {
+            type: 'line',
+            data: {
+                labels: ['30 ngày', '90 ngày', '180 ngày', '365 ngày', '730 ngày'],
+                datasets: [
+                    {
+                        label: 'HGG + GTR',
+                        data: [95, 80, 65, 45, 30],
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'HGG + STR',
+                        data: [90, 70, 50, 30, 15],
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'LGG + GTR',
+                        data: [99, 95, 90, 80, 70],
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'LGG + STR',
+                        data: [98, 93, 85, 75, 60],
+                        borderColor: 'rgba(23, 162, 184, 1)',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Tỷ lệ sống còn theo thời gian (mô phỏng)'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Tỷ lệ sống còn (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Thời gian'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Biểu đồ phân bố ngày sống còn
+        const survivalDistCtx = document.getElementById('survivalDistribution').getContext('2d');
+        
+        new Chart(survivalDistCtx, {
+            type: 'pie',
+            data: {
+                labels: ['< 180 ngày', '180-365 ngày', '366-730 ngày', '> 730 ngày'],
+                datasets: [{
+                    data: [15, 25, 35, 25],
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(23, 162, 184, 0.7)',
+                        'rgba(40, 167, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(23, 162, 184, 1)',
+                        'rgba(40, 167, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Phân bố thời gian sống còn (mô phỏng)'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

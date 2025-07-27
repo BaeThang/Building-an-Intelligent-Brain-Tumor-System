@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Lịch Sử Dự Đoán - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Lịch Sử Dự Đoán{% endblock %}
+{% block hero_subtitle %}Xem lại các dự đoán đã thực hiện trong hệ thống{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0"><i class="fas fa-history me-2"></i>Lịch Sử Dự Đoán</h3>
+                    <div>
+                        <a href="{{ url_for('compare_predictions') }}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-exchange-alt me-2"></i>So Sánh Dự Đoán
+                        </a>
+                        <a href="{{ url_for('upload_and_predict') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Dự Đoán Mới
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Danh sách dự đoán -->
+                {% if predictions|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Mã bệnh nhân</th>
+                                    <th>File</th>
+                                    <th>Lát cắt</th>
+                                    <th>Ghi chú</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prediction in predictions %}
+                                <tr>
+                                    <td>{{ prediction.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if prediction.brats_id and prediction.brats_id != "unknown" %}
+                                            <a href="{{ url_for('view_patient', brats_id=prediction.brats_id) }}" class="text-primary fw-bold">
+                                                {{ prediction.brats_id }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Không có</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prediction.filename }}</td>
+                                    <td>{{ prediction.slice_index }}</td>
+                                    <td>
+                                        {% if prediction.notes %}
+                                            {{ prediction.notes|truncate(30) }}
+                                        {% else %}
+                                            <span class="text-muted">Không có</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('view_prediction', prediction_id=prediction.id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye me-1"></i>Xem
+                                            </a>
+                                            <a href="{{ url_for('generate_report', prediction_id=prediction.id) }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                                <i class="fas fa-file-pdf me-1"></i>Báo cáo
+                                            </a>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="javascript:void(0);" onclick="addToCompare('{{ prediction.id }}')">
+                                                            <i class="fas fa-exchange-alt me-2"></i>Chọn để so sánh
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Phân trang - chỉ hiển thị nếu có nhiều dự đoán -->
+                    {% if predictions|length > 20 %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <!-- Hiển thị khi không có dự đoán -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-history fa-5x text-muted"></i>
+                        </div>
+                        <h5 class="text-muted mb-3">Chưa có dự đoán nào được thực hiện</h5>
+                        <p>Hãy tải lên ảnh MRI để thực hiện dự đoán đầu tiên của bạn</p>
+                        <a href="{{ url_for('upload_and_predict') }}" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus me-2"></i>Dự Đoán Mới
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- Tổng quan -->
+                {% if predictions|length > 0 %}
+                <div class="row mt-5">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-primary h-100">
+                            <div class="card-body text-center">
+                                <div class="display-4 text-primary mb-3">{{ predictions|length }}</div>
+                                <h5 class="card-title">Tổng số dự đoán</h5>
+                                <p class="card-text text-muted">Số lượng dự đoán đã thực hiện</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-success h-100">
+                            <div class="card-body text-center">
+                                {% set patient_count = [] %}
+                                {% for prediction in predictions %}
+                                    {% if prediction.brats_id and prediction.brats_id != "unknown" and prediction.brats_id not in patient_count %}
+                                        {% set _ = patient_count.append(prediction.brats_id) %}
+                                    {% endif %}
+                                {% endfor %}
+                                <div class="display-4 text-success mb-3">{{ patient_count|length }}</div>
+                                <h5 class="card-title">Bệnh nhân đã dự đoán</h5>
+                                <p class="card-text text-muted">Số lượng bệnh nhân khác nhau</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-info h-100">
+                            <div class="card-body text-center">
+                                <div class="display-4 text-info mb-3">
+                                    {% if predictions|length > 0 %}
+                                        {% set latest_time = predictions[0].created_at %}
+                                        {{ latest_time.strftime('%d/%m') }}
+                                    {% else %}
+                                        --/--
+                                    {% endif %}
+                                </div>
+                                <h5 class="card-title">Dự đoán gần nhất</h5>
+                                <p class="card-text text-muted">Ngày thực hiện dự đoán mới nhất</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chọn để so sánh -->
+<div class="modal fade" id="compareModal" tabindex="-1" aria-labelledby="compareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="compareModalLabel">Chọn dự đoán để so sánh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Đã chọn <span id="selectedCount">0</span>/2 dự đoán để so sánh.</p>
+                <div id="selectedPredictions"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnCompare" disabled>So sánh</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo DataTable nếu thư viện được tải
+        if (typeof $.fn.DataTable !== 'undefined') {
+            $('table').DataTable({
+                "order": [[0, "desc"]], // Sắp xếp theo thời gian mới nhất
+                "language": {
+                    "lengthMenu": "Hiển thị _MENU_ kết quả",
+                    "zeroRecords": "Không tìm thấy kết quả nào",
+                    "info": "Trang _PAGE_ / _PAGES_",
+                    "infoEmpty": "Không có dữ liệu",
+                    "infoFiltered": "(lọc từ _MAX_ kết quả)",
+                    "search": "Tìm kiếm:",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    }
+                }
+            });
+        }
+    });
+    
+    // Chức năng so sánh dự đoán
+    let selectedForCompare = [];
+    
+    function addToCompare(predictionId) {
+        if (selectedForCompare.length >= 2 && !selectedForCompare.includes(predictionId)) {
+            alert('Bạn chỉ có thể chọn tối đa 2 dự đoán để so sánh.');
+            return;
+        }
+        
+        if (selectedForCompare.includes(predictionId)) {
+            // Nếu đã chọn, bỏ chọn
+            selectedForCompare = selectedForCompare.filter(id => id !== predictionId);
+        } else {
+            // Nếu chưa chọn, thêm vào
+            selectedForCompare.push(predictionId);
+        }
+        
+        // Cập nhật UI
+        updateCompareSelection();
+        
+        // Hiển thị modal nếu đã chọn ít nhất 1 dự đoán
+        if (selectedForCompare.length > 0) {
+            var compareModal = new bootstrap.Modal(document.getElementById('compareModal'));
+            compareModal.show();
+        }
+    }
+    
+    function updateCompareSelection() {
+        const selectedCount = document.getElementById('selectedCount');
+        const selectedPredictions = document.getElementById('selectedPredictions');
+        const btnCompare = document.getElementById('btnCompare');
+        
+        selectedCount.textContent = selectedForCompare.length;
+        
+        // Cập nhật danh sách đã chọn
+        selectedPredictions.innerHTML = '';
+        selectedForCompare.forEach((id, index) => {
+            const div = document.createElement('div');
+            div.className = 'alert alert-info d-flex justify-content-between align-items-center';
+            div.innerHTML = `
+                <span>Dự đoán #${index + 1}: ${id}</span>
+                <button type="button" class="btn-close" onclick="addToCompare('${id}')"></button>
+            `;
+            selectedPredictions.appendChild(div);
+        });
+        
+        // Kích hoạt nút so sánh nếu đã chọn đủ 2 dự đoán
+        btnCompare.disabled = selectedForCompare.length !== 2;
+        
+        // Thêm sự kiện cho nút so sánh
+        if (selectedForCompare.length === 2) {
+            btnCompare.onclick = function() {
+                window.location.href = "{{ url_for('compare_predictions') }}" + "?prediction_ids=" + 
+                    selectedForCompare[0] + "&prediction_ids=" + selectedForCompare[1];
+            };
+        }
+    }
+</script>
+{% endblock %}

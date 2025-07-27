@@ -1,0 +1,11 @@
+flask==2.2.3
+werkzeug==2.2.3
+numpy==1.23.5
+tensorflow==2.12.0
+opencv-python==4.7.0.72
+nibabel==5.0.1
+matplotlib==3.7.1
+cassandra-driver==3.25.0
+pandas
+scikit-image
+scipy

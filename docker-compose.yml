@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-container
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s  # Thêm thời gian khởi động
+
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask-brain-tumor-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/app
+      - ./uploads:/app/uploads
+      - ./static:/app/static
+      - ./data:/app/data
+      - ${BRATS_DATA_PATH:-./brats_data}:/app/brats_data
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    environment:
+      - CASSANDRA_HOST=cassandra
+      - CQLENG_ALLOW_SCHEMA_MANAGEMENT=1
+      - BRATS_DATA_PATH=/app/brats_data
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+    restart: unless-stopped
+
+volumes:
+  cassandra-data:

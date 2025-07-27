@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Liên Hệ - Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Liên Hệ Với Chúng Tôi{% endblock %}
+
+{% block hero_subtitle %}Thông tin về nhóm nghiên cứu và phát triển ứng dụng phân đoạn khối u não{% endblock %}
+
+{% block content %}
+<!-- Contact Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Liên Hệ</h6>
+            <h1 class="mb-5">Thông Tin Nhóm Nghiên Cứu</h1>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <!-- Thông tin liên hệ -->
+            <div class="col-lg-5 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <h5>Thông Tin Liên Hệ</h5>
+                <p class="mb-4">Nếu bạn có bất kỳ câu hỏi nào về ứng dụng hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua các kênh sau:</p>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
+                        <i class="fa fa-map-marker-alt text-white"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Địa chỉ</h5>
+                        <p class="mb-0">Đại học Ngoại Ngữ - Tin Học</p>
+                        <p class="mb-0">806 QL22, ấp Mỹ Hoà 3, Hóc Môn, Hồ Chí Minh</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
+                        <i class="fa fa-phone-alt text-white"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Điện thoại</h5>
+                        <p class="mb-0">123456789</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary" style="width: 50px; height: 50px;">
+                        <i class="fa fa-envelope-open text-white"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Email</h5>
+                        <p class="mb-0">braintumor.research@huflit.edu.vn</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bản đồ -->
+            <div class="col-lg-5 col-md-12 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="position-relative h-100">
+                    <iframe class="position-relative rounded w-100 h-100"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.2901094780173!2d106.5980515748966!3d10.865525089288692!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752b088de30f3b%3A0xd2140740d360f705!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBOZ2_huqFpIG5n4buvIC0gVGluIGjhu41jIFRow6BuaCBwaOG7kSBI4buTIENow60gTWluaCAoSFVGTElUKSBDxqEgc-G7nyBIw7NjIE3DtG4!5e0!3m2!1svi!2s!4v1743077475452!5m2!1svi!2s"
+                        frameborder="0" style="min-height: 300px; border:0;" allowfullscreen="" aria-hidden="false"
+                        tabindex="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact End -->
+
+<!-- Team Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Đội Ngũ</h6>
+            <h1 class="mb-5">Thành Viên Nhóm Nghiên Cứu</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 1">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Nguyễn Đăng Khoa</h5>
+                        <small>22DH111665</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 2">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Trần Nguyễn Quốc Thắng</h5>
+                        <small>22DH113431</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 3">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Trần Gia Hy</h5>
+                        <small>22DH111474</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 4">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Đỗ Văn Dũng</h5>
+                        <small>22DH110615</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+                 
+        
+    </div>
+</div>
+<!-- FAQ End -->
+{% endblock %}

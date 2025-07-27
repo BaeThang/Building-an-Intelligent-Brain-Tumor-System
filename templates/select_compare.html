@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Chọn Dự Đoán để So Sánh | Hệ Thống Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Chọn Dự Đoán{% endblock %}
+{% block hero_subtitle %}Chọn 2 kết quả dự đoán để so sánh chi tiết{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">So Sánh</h6>
+        <h1 class="mb-5">Chọn Kết Quả Dự Đoán</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.3s">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa fa-exchange-alt me-2"></i>Chọn Chính Xác 2 Dự Đoán để So Sánh</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('compare_predictions') }}" method="post">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 50px;">Chọn</th>
+                                        <th style="width: 60px;">STT</th>
+                                        <th>ID Bệnh Nhân</th>
+                                        <th>Tên File</th>
+                                        <th>Lát Cắt</th>
+                                        <th>Thời Gian</th>
+                                        <th>Hình Ảnh</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prediction in predictions %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <input class="form-check-input prediction-checkbox" type="checkbox" name="prediction_ids" value="{{ prediction.id }}" id="prediction-{{ prediction.id }}">
+                                        </td>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ prediction.brats_id }}</td>
+                                        <td>{{ prediction.filename }}</td>
+                                        <td>{{ prediction.slice_index }}</td>
+                                        <td>{{ prediction.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ url_for('view_prediction', prediction_id=prediction.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fa fa-eye"></i> Xem
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <div id="selection-warning" class="alert alert-warning d-none">
+                                Vui lòng chọn đúng 2 dự đoán để so sánh!
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg" id="compare-btn" disabled>
+                                <i class="fa fa-exchange-alt me-2"></i>So Sánh Dự Đoán
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-12 wow fadeInUp" data-wow-delay="0.5s">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>Hướng Dẫn So Sánh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5>Cách Thức So Sánh:</h5>
+                            <ol>
+                                <li>Chọn đúng <strong>2 kết quả dự đoán</strong> bằng cách đánh dấu vào ô checkbox.</li>
+                                <li>Nhấn nút <strong>"So Sánh Dự Đoán"</strong> để xem kết quả so sánh chi tiết.</li>
+                                <li>Hệ thống sẽ hiển thị 2 kết quả dự đoán bên cạnh nhau.</li>
+                            </ol>
+                            
+                            <h5 class="mt-4">Các Tiêu Chí So Sánh:</h5>
+                            <ul>
+                                <li>Vị trí và kích thước khối u</li>
+                                <li>Phân loại mô bất thường (NCR/NET, ED, ET)</li>
+                                <li>Độ tin cậy của dự đoán</li>
+                                <li>Các thông số khác (nếu có)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <img src="{{ url_for('static', filename='img/compare-illustration.jpg') }}" alt="So sánh dự đoán" class="img-fluid rounded" style="max-height: 300px;" onerror="this.src='https://via.placeholder.com/500x300?text=So+sánh+dự+đoán';this.onerror='';">
+                            <p class="text-muted mt-2">Minh họa: So sánh 2 kết quả dự đoán</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.prediction-checkbox');
+        const compareBtn = document.getElementById('compare-btn');
+        const warningDiv = document.getElementById('selection-warning');
+        
+        // Hàm kiểm tra số lượng checkbox đã chọn
+        function updateButtonState() {
+            const checkedCount = document.querySelectorAll('.prediction-checkbox:checked').length;
+            
+            if (checkedCount === 2) {
+                compareBtn.disabled = false;
+                warningDiv.classList.add('d-none');
+            } else {
+                compareBtn.disabled = true;
+                
+                if (checkedCount > 2) {
+                    warningDiv.textContent = 'Chỉ được chọn tối đa 2 dự đoán để so sánh!';
+                    warningDiv.classList.remove('d-none');
+                } else if (checkedCount < 2 && checkedCount > 0) {
+                    warningDiv.textContent = 'Vui lòng chọn thêm 1 dự đoán nữa để so sánh!';
+                    warningDiv.classList.remove('d-none');
+                } else {
+                    warningDiv.classList.add('d-none');
+                }
+            }
+        }
+        
+        // Thêm sự kiện cho các checkbox
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', updateButtonState);
+        });
+        
+        // Khởi tạo trạng thái ban đầu
+        updateButtonState();
+    });
+</script>
+{% endblock %}

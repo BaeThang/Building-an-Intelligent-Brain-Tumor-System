@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Tìm Kiếm Bệnh Nhân - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Tìm Kiếm Bệnh Nhân{% endblock %}
+{% block hero_subtitle %}Tìm kiếm thông tin bệnh nhân theo mã ID{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <div class="mb-4 text-center">
+                    <h3><i class="fas fa-search me-2"></i>Tìm Kiếm Bệnh Nhân</h3>
+                    <p class="text-muted">Nhập mã BraTS </p>
+                </div>
+                
+                <form action="{{ url_for('search_patient') }}" method="post">
+                    <div class="input-group mb-4">
+                        <input type="text" name="search_term" class="form-control form-control-lg" 
+                               placeholder="Ví dụ: BraTS20_Training_001" required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search me-2"></i>Tìm Kiếm
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="card mt-5">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Gợi ý tìm kiếm</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Định dạng ID:</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">BraTS20_Training_XXX - Mã ID năm 2020</li>
+
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Mẹo tìm kiếm nhanh:</h6>
+                                <div class="alert alert-info">
+                                    <ul class="mb-0">
+                                        <li>Nhập chính xác mã ID để có kết quả tốt nhất</li>
+                                        <li>Hệ thống sẽ tự động tìm kiếm trên tất cả các loại ID</li>
+                                        <li>Kết quả sẽ hiển thị các thông tin bệnh nhân tương ứng</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-users fa-3x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Danh Sách Bệnh Nhân</h5>
+                                <p class="card-text text-muted">Xem danh sách tất cả bệnh nhân trong hệ thống</p>
+                                <a href="{{ url_for('list_patients') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>Xem Danh Sách
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-success">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-chart-pie fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title">Thống Kê</h5>
+                                <p class="card-text text-muted">Xem phân tích và thống kê về dữ liệu bệnh nhân</p>
+                                <a href="{{ url_for('statistics') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-chart-bar me-1"></i>Xem Thống Kê
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

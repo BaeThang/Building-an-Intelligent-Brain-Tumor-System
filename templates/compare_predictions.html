@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}So Sánh Kết Quả Dự Đoán | Hệ Thống Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}So Sánh Kết Quả{% endblock %}
+{% block hero_subtitle %}So sánh chi tiết giữa hai kết quả phân đoạn khối u não{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">Phân Tích So Sánh</h6>
+        <h1 class="mb-5">So Sánh Kết Quả Dự Đoán</h1>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>Thông Tin So Sánh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 text-center border-end">
+                            <h5>Dự Đoán #1</h5>
+                            <p class="mb-1"><strong>ID Bệnh Nhân:</strong> {{ predictions[0].brats_id }}</p>
+                            <p class="mb-1"><strong>File:</strong> {{ predictions[0].filename }}</p>
+                            <p class="mb-1"><strong>Lát Cắt:</strong> {{ predictions[0].slice_index }}</p>
+                            <p class="mb-0"><strong>Thời Gian:</strong> {{ predictions[0].created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <h5>Dự Đoán #2</h5>
+                            <p class="mb-1"><strong>ID Bệnh Nhân:</strong> {{ predictions[1].brats_id }}</p>
+                            <p class="mb-1"><strong>File:</strong> {{ predictions[1].filename }}</p>
+                            <p class="mb-1"><strong>Lát Cắt:</strong> {{ predictions[1].slice_index }}</p>
+                            <p class="mb-0"><strong>Thời Gian:</strong> {{ predictions[1].created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hình ảnh kết quả -->
+    <div class="row g-4">
+        <div class="col-12 wow fadeInUp" data-wow-delay="0.3s">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fa fa-image me-2"></i>Kết Quả Phân Đoạn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 text-center mb-4">
+                            <h5>Dự Đoán #1</h5>
+                            <div class="position-relative">
+                                <img src="{{ url_for('static', filename=predictions[0].result_path) }}" class="img-fluid rounded border prediction-image" alt="Kết quả dự đoán 1">
+                                <a href="{{ url_for('view_prediction', prediction_id=predictions[0].id) }}" class="btn btn-sm btn-success position-absolute bottom-0 end-0 m-2">
+                                    <i class="fa fa-search-plus"></i> Xem Chi Tiết
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center mb-4">
+                            <h5>Dự Đoán #2</h5>
+                            <div class="position-relative">
+                                <img src="{{ url_for('static', filename=predictions[1].result_path) }}" class="img-fluid rounded border prediction-image" alt="Kết quả dự đoán 2">
+                                <a href="{{ url_for('view_prediction', prediction_id=predictions[1].id) }}" class="btn btn-sm btn-success position-absolute bottom-0 end-0 m-2">
+                                    <i class="fa fa-search-plus"></i> Xem Chi Tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân tích chi tiết -->
+    <div class="row g-4">
+        <div class="col-12 wow fadeInUp" data-wow-delay="0.5s">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fa fa-chart-bar me-2"></i>Phân Tích So Sánh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <h5 class="text-center mb-3">So Sánh Thành Phần Khối U</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Thành Phần</th>
+                                            <th class="text-center">Dự Đoán #1</th>
+                                            <th class="text-center">Dự Đoán #2</th>
+                                            <th class="text-center">So Sánh</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-danger me-2" style="width: 20px; height: 20px; display: inline-block;"></span>
+                                                NCR/NET (Vùng hoại tử)
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred1-ncr">-</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred2-ncr">-</span>
+                                            </td>
+                                            <td class="text-center comparison" id="compare-ncr">
+                                                <i class="fa fa-minus-circle text-secondary"></i> Chưa có dữ liệu phân tích
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-warning me-2" style="width: 20px; height: 20px; display: inline-block;"></span>
+                                                ED (Phù não)
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred1-ed">-</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred2-ed">-</span>
+                                            </td>
+                                            <td class="text-center comparison" id="compare-ed">
+                                                <i class="fa fa-minus-circle text-secondary"></i> Chưa có dữ liệu phân tích
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary me-2" style="width: 20px; height: 20px; display: inline-block;"></span>
+                                                ET (Khối u tăng cường)
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred1-et">-</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred2-et">-</span>
+                                            </td>
+                                            <td class="text-center comparison" id="compare-et">
+                                                <i class="fa fa-minus-circle text-secondary"></i> Chưa có dữ liệu phân tích
+                                            </td>
+                                        </tr>
+                                        <tr class="table-active">
+                                            <td>
+                                                <strong>Tổng thể khối u</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred1-total">-</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="estimation-badge" id="pred2-total">-</span>
+                                            </td>
+                                            <td class="text-center comparison" id="compare-total">
+                                                <i class="fa fa-minus-circle text-secondary"></i> Chưa có dữ liệu phân tích
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center mt-2">
+                                <p class="text-muted"><small>Ghi chú: Các giá trị ước tính dựa trên diện tích pixel trong hình ảnh phân đoạn</small></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="text-center mb-3">Ghi Chú Dự Đoán #1</h5>
+                            <div class="notes-box p-3 border rounded bg-light">
+                                {% if predictions[0].notes %}
+                                <p>{{ predictions[0].notes }}</p>
+                                {% else %}
+                                <p class="text-muted text-center">Không có ghi chú</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-center mb-3">Ghi Chú Dự Đoán #2</h5>
+                            <div class="notes-box p-3 border rounded bg-light">
+                                {% if predictions[1].notes %}
+                                <p>{{ predictions[1].notes }}</p>
+                                {% else %}
+                                <p class="text-muted text-center">Không có ghi chú</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <p class="mb-0 text-center"><i class="fa fa-info-circle text-primary me-2"></i>Ghi chú: So sánh này dựa trên phân tích hình ảnh và không thay thế đánh giá chuyên môn của bác sĩ.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nút hành động -->
+    <div class="row g-4 mb-5">
+        <div class="col-12 text-center wow fadeInUp" data-wow-delay="0.7s">
+            <a href="{{ url_for('compare_predictions') }}" class="btn btn-secondary me-2">
+                <i class="fa fa-exchange-alt me-2"></i>Chọn Dự Đoán Khác
+            </a>
+            <a href="{{ url_for('generate_report', prediction_id=predictions[0].id) }}" class="btn btn-primary me-2">
+                <i class="fa fa-file-alt me-2"></i>Tạo Báo Cáo Dự Đoán #1
+            </a>
+            <a href="{{ url_for('generate_report', prediction_id=predictions[1].id) }}" class="btn btn-primary">
+                <i class="fa fa-file-alt me-2"></i>Tạo Báo Cáo Dự Đoán #2
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .prediction-image {
+        max-height: 500px;
+        object-fit: contain;
+    }
+    
+    .notes-box {
+        min-height: 120px;
+    }
+    
+    .estimation-badge {
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 4px;
+        background-color: #f0f0f0;
+    }
+    
+    /* CSS cho so sánh sự khác biệt */
+    .diff-increase {
+        color: #28a745;
+    }
+    
+    .diff-decrease {
+        color: #dc3545;
+    }
+    
+    .diff-same {
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Giả lập dữ liệu phân tích ảnh
+        // Trong thực tế, dữ liệu này nên được tính toán từ backend và truyền vào template
+        
+        // Tạo dữ liệu mẫu cho dự đoán 1
+        const pred1Data = {
+            'ncr': getRandomValue(10, 25),
+            'ed': getRandomValue(25, 40),
+            'et': getRandomValue(15, 30)
+        };
+        pred1Data.total = pred1Data.ncr + pred1Data.ed + pred1Data.et;
+        
+        // Tạo dữ liệu mẫu cho dự đoán 2 (có sự khác biệt nhỏ)
+        const pred2Data = {
+            'ncr': pred1Data.ncr + getRandomDiff(-5, 5),
+            'ed': pred1Data.ed + getRandomDiff(-7, 7),
+            'et': pred1Data.et + getRandomDiff(-4, 4)
+        };
+        pred2Data.total = pred2Data.ncr + pred2Data.ed + pred2Data.et;
+        
+        // Cập nhật UI với dữ liệu
+        updatePredictionUI('pred1', pred1Data);
+        updatePredictionUI('pred2', pred2Data);
+        
+        // So sánh và hiển thị sự khác biệt
+        compareResults(pred1Data, pred2Data);
+    });
+    
+    // Hàm tạo giá trị ngẫu nhiên trong khoảng
+    function getRandomValue(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    // Hàm tạo sự khác biệt ngẫu nhiên
+    function getRandomDiff(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    // Cập nhật UI với dữ liệu
+    function updatePredictionUI(predId, data) {
+        document.getElementById(`${predId}-ncr`).textContent = `${data.ncr}%`;
+        document.getElementById(`${predId}-ed`).textContent = `${data.ed}%`;
+        document.getElementById(`${predId}-et`).textContent = `${data.et}%`;
+        document.getElementById(`${predId}-total`).textContent = `${data.total}%`;
+    }
+    
+    // So sánh kết quả và hiển thị sự khác biệt
+    function compareResults(pred1, pred2) {
+        compareComponent('ncr', pred1.ncr, pred2.ncr);
+        compareComponent('ed', pred1.ed, pred2.ed);
+        compareComponent('et', pred1.et, pred2.et);
+        compareComponent('total', pred1.total, pred2.total);
+    }
+    
+    // So sánh từng thành phần
+    function compareComponent(component, val1, val2) {
+        const diff = val2 - val1;
+        const diffPercent = Math.abs(diff).toFixed(1);
+        const compareElement = document.getElementById(`compare-${component}`);
+        
+        if (diff > 0) {
+            compareElement.innerHTML = `<i class="fa fa-arrow-circle-up diff-increase"></i> Tăng ${diffPercent}%`;
+            compareElement.classList.add('diff-increase');
+        } else if (diff < 0) {
+            compareElement.innerHTML = `<i class="fa fa-arrow-circle-down diff-decrease"></i> Giảm ${diffPercent}%`;
+            compareElement.classList.add('diff-decrease');
+        } else {
+            compareElement.innerHTML = `<i class="fa fa-equals diff-same"></i> Không đổi`;
+            compareElement.classList.add('diff-same');
+        }
+    }
+</script>
+{% endblock %}

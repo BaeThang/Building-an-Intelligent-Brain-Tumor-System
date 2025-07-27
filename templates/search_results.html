@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Kết Quả Tìm Kiếm - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Kết Quả Tìm Kiếm{% endblock %}
+{% block hero_subtitle %}Kết quả tìm kiếm cho "{{ search_term }}"{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <!-- Nút điều hướng -->
+                <div class="mb-4">
+                    <a href="{{ url_for('search_patient') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại tìm kiếm
+                    </a>
+                </div>
+                
+                <!-- Thông tin tìm kiếm -->
+                <div class="alert alert-primary">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-search fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Kết quả tìm kiếm cho: "{{ search_term }}"</h5>
+                            <p class="mb-0">Tìm thấy {{ patients|length }} kết quả</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kết quả tìm kiếm -->
+                {% if patients|length > 0 %}
+                    <div class="table-responsive mt-4">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã BraTS</th>
+                                    <th>Tuổi</th>
+                                    <th>Cấp Độ</th>
+                                    <th>Ngày Sống Còn</th>
+                                    <th>Mức Độ Cắt Bỏ</th>
+                                    <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients %}
+                                <tr>
+                                    <td class="fw-bold">{{ patient.brats20id }}</td>
+                                    <td>{{ patient.age if patient.age else 'N/A' }}</td>
+                                    <td>
+                                        {% if patient.grade == 'HGG' %}
+                                            <span class="badge bg-danger">HGG</span>
+                                        {% elif patient.grade == 'LGG' %}
+                                            <span class="badge bg-warning text-dark">LGG</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Không xác định</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ patient.survival_days if patient.survival_days else 'N/A' }}</td>
+                                    <td>{{ patient.extent_of_resection if patient.extent_of_resection else 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('view_patient', brats_id=patient.brats20id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye me-1"></i>Xem
+                                            </a>
+                                            <a href="{{ url_for('upload_and_predict') }}?brats_id={{ patient.brats20id }}" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-brain me-1"></i>Dự Đoán
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Thẻ thông tin chi tiết cho kết quả đầu tiên -->
+                    {% set first_patient = patients[0] %}
+                    <div class="card mt-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Chi tiết bệnh nhân {{ first_patient.brats20id }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center mb-3 mb-md-0">
+                                    <div class="d-inline-flex justify-content-center align-items-center bg-light rounded-circle mb-3" 
+                                         style="width: 100px; height: 100px;">
+                                        <i class="fas fa-user-alt fa-3x text-primary"></i>
+                                    </div>
+                                    <h4>{{ first_patient.brats20id }}</h4>
+                                    {% if first_patient.grade %}
+                                        {% if first_patient.grade == 'HGG' %}
+                                            <span class="badge bg-danger py-2 px-3">High-Grade Glioma (HGG)</span>
+                                        {% elif first_patient.grade == 'LGG' %}
+                                            <span class="badge bg-warning text-dark py-2 px-3">Low-Grade Glioma (LGG)</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary py-2 px-3">{{ first_patient.grade }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary py-2 px-3">Không xác định</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-3">
+                                            <h6 class="text-muted">Tuổi:</h6>
+                                            <p class="fs-5">{{ first_patient.age if first_patient.age else 'Không có thông tin' }}</p>
+                                        </div>
+                                        <div class="col-sm-6 mb-3">
+                                            <h6 class="text-muted">Ngày sống còn:</h6>
+                                            <p class="fs-5">{{ first_patient.survival_days if first_patient.survival_days else 'Không có thông tin' }}</p>
+                                        </div>
+                                        <div class="col-sm-12 mb-3">
+                                            <h6 class="text-muted">Mức độ cắt bỏ:</h6>
+                                            <p class="fs-5">{{ first_patient.extent_of_resection if first_patient.extent_of_resection else 'Không có thông tin' }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('view_patient', brats_id=first_patient.brats20id) }}" class="btn btn-info text-white">
+                                            <i class="fas fa-user-md me-2"></i>Xem hồ sơ chi tiết
+                                        </a>
+                                        <a href="{{ url_for('upload_and_predict') }}?brats_id={{ first_patient.brats20id }}" class="btn btn-outline-primary ms-2">
+                                            <i class="fas fa-brain me-2"></i>Tạo dự đoán mới
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Không tìm thấy kết quả -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-search fa-5x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">Không tìm thấy kết quả nào</h4>
+                        <p>Không tìm thấy bệnh nhân nào khớp với từ khóa "{{ search_term }}"</p>
+                        <div class="mt-4">
+                            <a href="{{ url_for('search_patient') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-search me-2"></i>Tìm Kiếm Lại
+                            </a>
+                            <a href="{{ url_for('list_patients') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-list me-2"></i>Xem Tất Cả Bệnh Nhân
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Gợi ý tìm kiếm -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Gợi ý</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Kiểm tra lại từ khóa tìm kiếm và thử lại</li>
+                                <li>Đảm bảo rằng bạn đã nhập đúng định dạng ID (ví dụ: BraTS20_001)</li>
+                                <li>Thử tìm kiếm với các ID khác (BraTS17, BraTS18, BraTS19, TCGA)</li>
+                                <li>Kiểm tra xem dữ liệu đã được tải từ CSV vào cơ sở dữ liệu chưa</li>
+                            </ul>
+                            <a href="{{ url_for('load_csv') }}" class="btn btn-outline-primary mt-2">
+                                <i class="fas fa-sync me-2"></i>Đồng Bộ Dữ Liệu CSV
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Tìm kiếm khác -->
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-search me-2"></i>Tìm kiếm khác</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('search_patient') }}" method="post">
+                            <div class="input-group">
+                                <input type="text" name="search_term" class="form-control" 
+                                       placeholder="Nhập từ khóa tìm kiếm khác" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search me-1"></i>Tìm Kiếm
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Hiệu ứng highlight cho từ khóa tìm kiếm trong bảng kết quả
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchTerm = "{{ search_term }}";
+        if (searchTerm) {
+            const highlightText = (node) => {
+                if (node.nodeType === 3) { // Node văn bản
+                    const text = node.nodeValue;
+                    const regex = new RegExp(searchTerm, 'gi');
+                    if (regex.test(text)) {
+                        const newNode = document.createElement('span');
+                        newNode.innerHTML = text.replace(regex, '<mark class="highlight bg-warning">$&</mark>');
+                        node.parentNode.replaceChild(newNode, node);
+                    }
+                } else if (node.nodeType === 1) { // Node phần tử
+                    if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE' && !node.classList.contains('highlight')) {
+                        Array.from(node.childNodes).forEach(child => highlightText(child));
+                    }
+                }
+            };
+
+            // Chỉ highlight trong bảng kết quả, không trong các phần khác
+            const tableBody = document.querySelector('tbody');
+            if (tableBody) {
+                Array.from(tableBody.childNodes).forEach(child => highlightText(child));
+            }
+        }
+    });
+</script>
+{% endblock %}

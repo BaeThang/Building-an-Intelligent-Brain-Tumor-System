@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Kết Quả Phân Đoạn - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Kết Quả Phân Đoạn Khối U Não{% endblock %}
+{% block hero_subtitle %}Kết quả phân tích ảnh MRI bằng Deep Learning{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">Kết quả phân đoạn khối u não</h3>
+                    <div>
+                        <a href="{{ url_for('generate_report', prediction_id=prediction.id) }}" class="btn btn-outline-primary me-2" target="_blank">
+                            <i class="fas fa-file-pdf me-2"></i>Tạo báo cáo
+                        </a>
+                        <a href="{{ url_for('upload_and_predict') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Dự đoán mới
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Thông tin dự đoán -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin dự đoán</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless mb-0">
+                                    <tr>
+                                        <th>ID dự đoán:</th>
+                                        <td>{{ prediction.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Lát cắt:</th>
+                                        <td>{{ prediction.slice_index }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Thời gian:</th>
+                                        <td>{{ prediction.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tên file:</th>
+                                        <td>{{ prediction.filename }}</td>
+                                    </tr>
+                                    {% if prediction.notes %}
+                                    <tr>
+                                        <th>Ghi chú:</th>
+                                        <td>{{ prediction.notes }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        {% if patient %}
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông tin bệnh nhân</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless mb-0">
+                                    <tr>
+                                        <th>Mã BraTS:</th>
+                                        <td>{{ patient.brats20id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tuổi:</th>
+                                        <td>{{ patient.age if patient.age else 'Không có thông tin' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cấp độ:</th>
+                                        <td>
+                                            {% if patient.grade == 'HGG' %}
+                                                <span class="badge bg-danger">HGG (High-Grade Glioma)</span>
+                                            {% elif patient.grade == 'LGG' %}
+                                                <span class="badge bg-warning text-dark">LGG (Low-Grade Glioma)</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Không xác định</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if patient.survival_days %}
+                                    <tr>
+                                        <th>Ngày sống còn:</th>
+                                        <td>{{ patient.survival_days }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if patient.extent_of_resection %}
+                                    <tr>
+                                        <th>Mức độ cắt bỏ:</th>
+                                        <td>{{ patient.extent_of_resection }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                                <a href="{{ url_for('view_patient', brats_id=patient.brats20id) }}" class="btn btn-sm btn-outline-info mt-2">
+                                    <i class="fas fa-user-md me-1"></i>Xem chi tiết bệnh nhân
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông tin bệnh nhân</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <p class="text-muted">Không có thông tin bệnh nhân liên kết với dự đoán này.</p>
+                                <a href="{{ url_for('list_patients') }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-search me-1"></i>Tìm bệnh nhân
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Ảnh kết quả -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Kết quả phân đoạn khối u não</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('static', filename=image) }}" class="img-fluid rounded shadow" alt="Kết quả phân đoạn khối u não">
+                    </div>
+                </div>
+                
+                <!-- Giải thích kết quả -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Giải thích kết quả</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h5>Các thành phần khối u:</h5>
+                                <ul class="list-group list-group-flush mb-3">
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <span class="badge bg-dark me-2" style="width: 20px; height: 20px;"></span>
+                                        <strong>Background (Nền)</strong> - Mô não bình thường
+                                    </li>
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <span class="badge bg-danger me-2" style="width: 20px; height: 20px;"></span>
+                                        <strong>NCR/NET (Non-enhancing tumor core)</strong> - Vùng hoại tử/Khối u không tương phản
+                                    </li>
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <span class="badge bg-warning me-2" style="width: 20px; height: 20px;"></span>
+                                        <strong>ED (Peritumoral Edematous/Invaded Tissue)</strong> - Vùng phù quanh u/mô bị xâm lấn
+                                    </li>
+                                    <li class="list-group-item d-flex align-items-center">
+                                        <span class="badge bg-primary me-2" style="width: 20px; height: 20px;"></span>
+                                        <strong>ET (Enhancing Tumor)</strong> - Vùng khối u tương phản 
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="alert alert-info">
+                                    <h5><i class="fas fa-lightbulb me-2"></i>Lưu ý:</h5>
+                                    <p class="mb-0">Kết quả này chỉ mang tính chất tham khảo. Vui lòng tham khảo ý kiến bác sĩ chuyên khoa để có kết luận chính xác.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nút điều hướng -->
+                <div class="text-center">
+                    <a href="{{ url_for('prediction_history') }}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-history me-2"></i>Xem lịch sử dự đoán
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Thêm hiệu ứng khi tải trang
+    document.addEventListener('DOMContentLoaded', function() {
+        const resultImage = document.querySelector('.card-body img');
+        resultImage.style.opacity = '0';
+        resultImage.style.transition = 'opacity 1s ease-in-out';
+        
+        // Đảm bảo hình ảnh đã tải xong
+        if (resultImage.complete) {
+            resultImage.style.opacity = '1';
+        } else {
+            resultImage.onload = function() {
+                resultImage.style.opacity = '1';
+            };
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block title %}Tải lên ảnh MRI - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Tải lên ảnh MRI{% endblock %}
+{% block hero_subtitle %}Tải lên ảnh MRI định dạng .nii hoặc .nii.gz để thực hiện phân đoạn khối u não{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <!-- Thêm nút chọn BraTS ở đây -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">Tải lên ảnh MRI để dự đoán</h3>
+                    <a href="#" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#selectBratsModal">
+                        <i class="fas fa-database me-2"></i>Chọn từ dữ liệu BraTS
+                    </a>
+                </div>
+                
+                <p class="mb-4">Hỗ trợ định dạng .nii và .nii.gz. Vui lòng tải lên cả ảnh FLAIR và T1CE để kết quả chính xác nhất.</p>
+                
+                <form action="{{ url_for('upload_and_predict') }}" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label for="flair_file" class="form-label"><i class="fa fa-file-medical me-2"></i>File FLAIR</label>
+                                <input class="form-control" type="file" id="flair_file" name="flair_file" required onchange="previewSlice('flair')">
+                                <div class="form-text">File .nii hoặc .nii.gz chứa ảnh FLAIR</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="mb-3">
+                                <label for="t1ce_file" class="form-label"><i class="fa fa-file-medical me-2"></i>File T1CE</label>
+                                <input class="form-control" type="file" id="t1ce_file" name="t1ce_file" required onchange="previewSlice('t1ce')">
+                                <div class="form-text">File .nii hoặc .nii.gz chứa ảnh T1CE</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="slice_index" class="form-label">Chọn lát cắt (0-155)</label>
+                                <input type="range" class="form-range" min="0" max="155" step="1" value="60" id="slice_index" name="slice_index" oninput="updateSliceValue();" onchange="previewSlices();">
+                                <div class="text-center" id="slice_value">Lát cắt: 60</div>
+                                <div class="form-text text-center">Di chuyển thanh trượt và thả ra để xem trước lát cắt mới</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <div class="border p-2 mb-3">
+                                        <div id="preview_flair" class="preview-container d-flex align-items-center justify-content-center">
+                                            <div class="text-muted">Xem trước FLAIR</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <div class="border p-2 mb-3">
+                                        <div id="preview_t1ce" class="preview-container d-flex align-items-center justify-content-center">
+                                            <div class="text-muted">Xem trước T1CE</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="brats_id" class="form-label">Mã bệnh nhân (nếu có)</label>
+                                <input type="text" class="form-control" id="brats_id" name="brats_id" placeholder="Ví dụ: BraTS20_001">
+                                <div class="form-text">Nhập mã bệnh nhân nếu có để liên kết với hồ sơ bệnh nhân</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Ghi chú</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Nhập ghi chú về ca bệnh hoặc dự đoán này"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 text-center">
+                            <button class="btn btn-primary py-3 px-5" type="submit">
+                                <i class="fa fa-brain me-2"></i>Thực hiện phân đoạn
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chọn dữ liệu BraTS -->
+<div class="modal fade" id="selectBratsModal" tabindex="-1" aria-labelledby="selectBratsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="selectBratsModalLabel">
+                    <i class="fas fa-database me-2"></i>Chọn dữ liệu từ BraTS
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Bộ lọc -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Bộ lọc</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Tìm kiếm</span>
+                                    <input type="text" id="bratsSearchInput" class="form-control" placeholder="Nhập ID bệnh nhân...">
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <select id="bratsGradeFilter" class="form-select">
+                                    <option value="all">Tất cả cấp độ</option>
+                                    <option value="HGG">HGG</option>
+                                    <option value="LGG">LGG</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <button class="btn btn-outline-secondary w-100" onclick="resetBratsFilters()">
+                                    <i class="fas fa-sync-alt me-2"></i>Đặt lại
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Danh sách bệnh nhân BraTS -->
+                <div class="table-responsive">
+                    <table class="table table-hover" id="bratsPatientsTable">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID Bệnh Nhân</th>
+                                <th>Đường Dẫn FLAIR</th>
+                                <th>Đường Dẫn T1CE</th>
+                                <th>Cấp Độ</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in brats_patients %}
+                            <tr class="brats-patient-row" data-id="{{ patient.id }}">
+                                <td>{{ patient.id }}</td>
+                                <td class="text-truncate" style="max-width: 200px;" title="{{ patient.flair_path }}">
+                                    {{ patient.flair_path }}
+                                </td>
+                                <td class="text-truncate" style="max-width: 200px;" title="{{ patient.t1ce_path }}">
+                                    {{ patient.t1ce_path }}
+                                </td>
+                                <td class="grade-cell">
+                                    {% set grade = 'Unknown' %}
+                                    {% if patient.id.startswith('BraTS20') %}
+                                        {% for p in patients_db if p.brats20id == patient.id %}
+                                            {% set grade = p.grade %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    
+                                    {% if grade == 'HGG' %}
+                                        <span class="badge bg-danger">HGG</span>
+                                    {% elif grade == 'LGG' %}
+                                        <span class="badge bg-warning text-dark">LGG</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Không xác định</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-sm" 
+                                            onclick="openBratsModal('{{ patient.id }}', '{{ patient.flair_path }}', '{{ patient.t1ce_path }}')">
+                                        <i class="fas fa-brain me-1"></i>Chọn
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if not brats_patients or brats_patients|length == 0 %}
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-database fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">Không tìm thấy dữ liệu BraTS</h5>
+                    <p>Không có dữ liệu BraTS nào được tìm thấy trong hệ thống.</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chọn lát cắt cho BraTS -->
+<!-- Modal chọn lát cắt cho BraTS với xem trước ảnh -->
+<div class="modal fade" id="bratsSliceModal" tabindex="-1" aria-labelledby="bratsSliceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="bratsSliceModalLabel">Chọn lát cắt cho dự đoán</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('predict_brats') }}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="brats_patient_id" name="brats_id">
+                    <input type="hidden" id="brats_flair_path" name="flair_path">
+                    <input type="hidden" id="brats_t1ce_path" name="t1ce_path">
+                    
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="bratsPatientInfo">Chọn lát cắt cho bệnh nhân</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="brats_slice_index" class="form-label">Chọn lát cắt (0-155)</label>
+                            <input type="range" class="form-range" min="0" max="155" step="1" 
+                                   value="60" id="brats_slice_index" name="slice_index" oninput="updateBratsSliceValue()" onchange="updateBratsPreview()">
+                            <div class="text-center" id="brats_slice_value">Lát cắt: 60</div>
+                        </div>
+                        
+                        <!-- Phần xem trước ảnh -->
+                        <div class="col-12 mb-4">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">FLAIR</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div id="brats_preview_flair" class="preview-container d-flex align-items-center justify-content-center" style="height: 250px;">
+                                                <div class="text-center">
+                                                    <div class="spinner-border text-primary mb-2" role="status">
+                                                        <span class="visually-hidden">Đang tải...</span>
+                                                    </div>
+                                                    <p class="mb-0">Đang tải ảnh FLAIR...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">T1CE</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div id="brats_preview_t1ce" class="preview-container d-flex align-items-center justify-content-center" style="height: 250px;">
+                                                <div class="text-center">
+                                                    <div class="spinner-border text-primary mb-2" role="status">
+                                                        <span class="visually-hidden">Đang tải...</span>
+                                                    </div>
+                                                    <p class="mb-0">Đang tải ảnh T1CE...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="brats_notes" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="brats_notes" name="notes" rows="3" 
+                                      placeholder="Nhập ghi chú về ca bệnh hoặc dự đoán này (không bắt buộc)"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-brain me-2"></i>Thực hiện phân đoạn
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Lưu trữ thông tin file đã tải lên
+    let fileCache = {
+        'flair': null,
+        't1ce': null
+    };
+    
+    // Đánh dấu đang tải
+    let isLoading = {
+        'flair': false,
+        't1ce': false
+    };
+    
+    // Biến để lưu trữ các modal
+    let bratsSliceModal;
+    let selectBratsModal;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo modal
+        bratsSliceModal = new bootstrap.Modal(document.getElementById('bratsSliceModal'));
+        selectBratsModal = new bootstrap.Modal(document.getElementById('selectBratsModal'));
+        
+        // Khởi tạo DataTable nếu thư viện được tải
+        if (typeof $.fn.DataTable !== 'undefined') {
+            $('#bratsPatientsTable').DataTable({
+                "order": [[0, "asc"]], // Sắp xếp theo ID
+                "language": {
+                    "lengthMenu": "Hiển thị _MENU_ bệnh nhân",
+                    "zeroRecords": "Không tìm thấy bệnh nhân nào",
+                    "info": "Trang _PAGE_ / _PAGES_",
+                    "infoEmpty": "Không có dữ liệu",
+                    "infoFiltered": "(lọc từ _MAX_ bệnh nhân)",
+                    "search": "Tìm kiếm:",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    }
+                }
+            });
+        } else {
+            // Nếu không có DataTable, sử dụng lọc tự tạo
+            setupBratsCustomFilters();
+        }
+        
+        // Thêm CSS cho preview container
+        const style = document.createElement('style');
+        style.textContent = `
+            .preview-container {
+                height: 200px;
+                background-color: #f8f9fa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+            .preview-container img {
+                max-height: 100%;
+                max-width: 100%;
+                object-fit: contain;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Thêm event listeners cho file inputs
+        document.getElementById('flair_file').addEventListener('change', function() {
+            previewSlice('flair');
+        });
+        
+        document.getElementById('t1ce_file').addEventListener('change', function() {
+            previewSlice('t1ce');
+        });
+    });
+    
+    function updateSliceValue() {
+        var sliceIndex = document.getElementById('slice_index').value;
+        document.getElementById('slice_value').innerHTML = 'Lát cắt: ' + sliceIndex;
+    }
+    
+    function updateBratsSliceValue() {
+        var sliceIndex = document.getElementById('brats_slice_index').value;
+        document.getElementById('brats_slice_value').innerHTML = 'Lát cắt: ' + sliceIndex;
+    }
+    
+    function previewSlices() {
+        // Chỉ tạo xem trước mới khi thanh trượt thay đổi nếu có file đã được chọn
+        if (fileCache['flair']) {
+            previewSlice('flair');
+        }
+        if (fileCache['t1ce']) {
+            previewSlice('t1ce');
+        }
+    }
+    
+    function previewSlice(fileType) {
+        const fileInput = document.getElementById(fileType + '_file');
+        const previewDiv = document.getElementById('preview_' + fileType);
+        const sliceIndex = document.getElementById('slice_index').value;
+        
+        // Nếu đang có request đang xử lý, không gửi request mới
+        if (isLoading[fileType]) {
+            return;
+        }
+        
+        if (fileInput.files && fileInput.files[0]) {
+            // Lưu thông tin file vào cache
+            if (!fileCache[fileType] || fileCache[fileType].name !== fileInput.files[0].name) {
+                fileCache[fileType] = fileInput.files[0];
+            }
+            
+            // Đánh dấu đang tải
+            isLoading[fileType] = true;
+            
+            // Hiển thị spinner khi đang tải
+            previewDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+            
+            // Tạo form data
+            const formData = new FormData();
+            formData.append('mri_file', fileCache[fileType]);
+            formData.append('slice_index', sliceIndex);
+            formData.append('file_type', fileType);
+            
+            // Thêm timeout để hủy request nếu quá lâu
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            
+            // Gửi request
+            fetch('{{ url_for("preview_slice") }}', {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Tạo một đối tượng Image mới để đảm bảo ảnh tải hoàn tất trước khi hiển thị
+                    const img = new Image();
+                    img.onload = function() {
+                        previewDiv.innerHTML = '';
+                        previewDiv.appendChild(img);
+                        img.classList.add('img-fluid');
+                        img.alt = `${fileType.toUpperCase()} Preview`;
+                    };
+                    img.onerror = function() {
+                        previewDiv.innerHTML = `<div class="text-danger">Không thể tải hình ảnh</div>`;
+                    };
+                    img.src = `${data.preview_url}?t=${new Date().getTime()}`;
+                } else {
+                    previewDiv.innerHTML = `<div class="text-danger">${data.error || 'Lỗi tạo xem trước'}</div>`;
+                }
+            })
+            .catch(error => {
+                if (error.name === 'AbortError') {
+                    previewDiv.innerHTML = `<div class="text-danger">Yêu cầu bị hủy do mất quá nhiều thời gian</div>`;
+                } else {
+                    previewDiv.innerHTML = `<div class="text-danger">Lỗi: ${error.message}</div>`;
+                    console.error('Error:', error);
+                }
+            })
+            .finally(() => {
+                // Đánh dấu đã hoàn thành tải
+                isLoading[fileType] = false;
+            });
+        }
+    }
+    
+    // Mở modal chọn lát cắt cho BraTS
+    function openBratsModal(bratsId, flairPath, t1cePath) {
+    // Lưu thông tin bệnh nhân vào form
+    document.getElementById('brats_patient_id').value = bratsId;
+    document.getElementById('brats_flair_path').value = flairPath;
+    document.getElementById('brats_t1ce_path').value = t1cePath;
+    document.getElementById('bratsPatientInfo').textContent = `Chọn lát cắt cho bệnh nhân ${bratsId}`;
+    
+    // Ẩn modal chọn BraTS
+    selectBratsModal.hide();
+    
+    // Hiển thị modal chọn lát cắt và tải ảnh xem trước
+    setTimeout(() => {
+        bratsSliceModal.show();
+        // Tải ảnh xem trước sau khi modal hiển thị
+        updateBratsPreview();
+    }, 500);
+}
+
+// Cập nhật giá trị lát cắt trong form BraTS
+function updateBratsSliceValue() {
+    const sliceIndex = document.getElementById('brats_slice_index').value;
+    document.getElementById('brats_slice_value').innerHTML = 'Lát cắt: ' + sliceIndex;
+}
+
+// Tải ảnh xem trước cho phiên BraTS
+function updateBratsPreview() {
+    const bratsId = document.getElementById('brats_patient_id').value;
+    const flairPath = document.getElementById('brats_flair_path').value;
+    const t1cePath = document.getElementById('brats_t1ce_path').value;
+    const sliceIndex = document.getElementById('brats_slice_index').value;
+    
+    // Cập nhật xem trước FLAIR
+    loadBratsSlicePreview('flair', bratsId, flairPath, sliceIndex);
+    
+    // Cập nhật xem trước T1CE
+    loadBratsSlicePreview('t1ce', bratsId, t1cePath, sliceIndex);
+}
+
+// Tải ảnh xem trước cho một loại file cụ thể (FLAIR hoặc T1CE)
+function loadBratsSlicePreview(fileType, bratsId, filePath, sliceIndex) {
+    const previewDiv = document.getElementById('brats_preview_' + fileType);
+    
+    // Hiển thị spinner loading
+    previewDiv.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-2" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mb-0">Đang tải ảnh ${fileType.toUpperCase()}...</p>
+        </div>
+    `;
+    
+    // Tạo dữ liệu để gửi request
+    const formData = new FormData();
+    formData.append('brats_id', bratsId);
+    formData.append('file_path', filePath);
+    formData.append('file_type', fileType);
+    formData.append('slice_index', sliceIndex);
+    
+    // Thêm timeout để hủy request nếu quá lâu
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    
+    // Gửi request đến API để lấy ảnh xem trước lát cắt của bệnh nhân
+    fetch('{{ url_for("patient_slice_data") }}', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal
+    })
+    .then(response => {
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            throw new Error(`Lỗi HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Tạo một đối tượng Image mới để đảm bảo ảnh tải hoàn tất trước khi hiển thị
+            const img = new Image();
+            img.onload = function() {
+                previewDiv.innerHTML = '';
+                previewDiv.appendChild(img);
+                img.classList.add('img-fluid');
+                img.alt = `${fileType.toUpperCase()} Slice ${sliceIndex}`;
+            };
+            img.onerror = function() {
+                previewDiv.innerHTML = `<div class="text-danger">Không thể tải hình ảnh</div>`;
+            };
+            img.src = data.image_data;
+        } else {
+            previewDiv.innerHTML = `<div class="text-danger">${data.error || 'Lỗi tạo xem trước'}</div>`;
+        }
+    })
+    .catch(error => {
+        if (error.name === 'AbortError') {
+            previewDiv.innerHTML = `<div class="text-danger">Yêu cầu bị hủy do mất quá nhiều thời gian</div>`;
+        } else {
+            previewDiv.innerHTML = `<div class="text-danger">Lỗi: ${error.message}</div>`;
+            console.error('Error:', error);
+        }
+    });
+}
+    
+    // Thiết lập bộ lọc tùy chỉnh cho BraTS
+    function setupBratsCustomFilters() {
+        const searchInput = document.getElementById('bratsSearchInput');
+        const gradeFilter = document.getElementById('bratsGradeFilter');
+        const rows = document.querySelectorAll('.brats-patient-row');
+        
+        searchInput.addEventListener('input', filterBratsTable);
+        gradeFilter.addEventListener('change', filterBratsTable);
+        
+        function filterBratsTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const gradeValue = gradeFilter.value;
+            
+            rows.forEach(row => {
+                const id = row.querySelector('td').textContent.toLowerCase();
+                const gradeCell = row.querySelector('.grade-cell');
+                const grade = gradeCell.textContent.trim();
+                
+                let matchesSearch = id.includes(searchTerm);
+                let matchesGrade = gradeValue === 'all' || 
+                                  (gradeValue === 'HGG' && grade.includes('HGG')) || 
+                                  (gradeValue === 'LGG' && grade.includes('LGG'));
+                
+                row.style.display = (matchesSearch && matchesGrade) ? '' : 'none';
+            });
+        }
+    }
+    
+    // Đặt lại bộ lọc BraTS
+    function resetBratsFilters() {
+        document.getElementById('bratsSearchInput').value = '';
+        document.getElementById('bratsGradeFilter').value = 'all';
+        
+        if (typeof $.fn.DataTable !== 'undefined') {
+            // Nếu sử dụng DataTable
+            $('#bratsPatientsTable').DataTable().search('').columns().search('').draw();
+        } else {
+            // Nếu sử dụng bộ lọc tùy chỉnh
+            const rows = document.querySelectorAll('.brats-patient-row');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+        }
+    }
+</script>
+{% endblock %}

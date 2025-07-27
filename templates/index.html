@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Hệ Thống Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_subtitle %}Sử dụng mô hình Deep Learning để phân đoạn khối u não từ ảnh MRI{% endblock %}
+
+{% block hero_content %}
+<div class="position-relative w-75 mx-auto animated slideInDown">
+    <a href="{{ url_for('upload_and_predict') }}" class="btn btn-outline-light py-md-3 px-md-5 animated slideInRight">Bắt Đầu Dự Đoán</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<!-- Team Section -->
+
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Nhóm Nghiên Cứu</h6>
+            <h1 class="mb-5">Thành Viên Nhóm</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 1">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Nguyễn Đăng Khoa</h5>
+                        <small>22DH111665</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 2">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Trần Nguyễn Quốc Thắng</h5>
+                        <small>22DH113431</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 3">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Trần Gia Hy</h5>
+                        <small>22DH111474</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+                <div class="team-item">
+                    <div class="overflow-hidden">
+                        <img class="img-fluid" src="{{ url_for('static', filename='img/img_avatar.png') }}" alt="Thành viên 4">
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -19px;">
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-square mx-1" href=""><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-0">Đỗ Văn Dũng</h5>
+                        <small>22DH110615</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Team Section -->
+{% endblock %}

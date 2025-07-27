@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Thống Kê | Hệ Thống Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Thống Kê{% endblock %}
+{% block hero_subtitle %}Thông tin tổng quan về dữ liệu bệnh nhân và dự đoán{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">Thống Kê</h6>
+        <h1 class="mb-5">Tổng Quan Dữ Liệu</h1>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Card: Tổng số bệnh nhân -->
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="card border-primary mb-3 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa fa-users me-2"></i>Tổng Số Bệnh Nhân</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-3 text-primary">{{ patient_count }}</h1>
+                    <p class="card-text">Số lượng bệnh nhân trong cơ sở dữ liệu</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Tổng số dự đoán -->
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+            <div class="card border-success mb-3 h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fa fa-chart-line me-2"></i>Tổng Số Dự Đoán</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-3 text-success">{{ prediction_count }}</h1>
+                    <p class="card-text">Số lượng dự đoán đã thực hiện trên hệ thống</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-3">
+        <!-- Phân phối cấp độ khối u -->
+        <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fa fa-chart-pie me-2"></i>Phân Phối Cấp Độ Khối U</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="gradeChart" width="400" height="300"></canvas>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cấp Độ</th>
+                                    <th>Số Lượng</th>
+                                    <th>Tỷ Lệ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for grade, count in grade_stats.items() %}
+                                <tr>
+                                    <td>{{ grade }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ "%.1f"|format(count / patient_count * 100) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân phối độ tuổi -->
+        <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.7s">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fa fa-users me-2"></i>Phân Phối Độ Tuổi</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ageChart" width="400" height="300"></canvas>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nhóm Tuổi</th>
+                                    <th>Số Lượng</th>
+                                    <th>Tỷ Lệ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for age_range, count in age_ranges.items() %}
+                                <tr>
+                                    <td>{{ age_range }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ "%.1f"|format(count / patient_count * 100) if patient_count > 0 else 0 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Statistics Section -->
+    <div class="row g-4 mt-5 mb-5 wow fadeInUp" data-wow-delay="0.9s">
+        <div class="col-12">
+            <div class="text-center mb-4">
+                <h6 class="section-title bg-white text-center text-primary px-3">Thông Tin Bổ Sung</h6>
+                <h1 class="mb-3">Liên Kết Hữu Ích</h1>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa fa-heartbeat fa-3x text-primary mb-3"></i>
+                            <h4 class="card-title">Phân Tích Tiên Lượng Sống Còn</h4>
+                            <p class="card-text">Xem phân tích chi tiết về tiên lượng sống còn dựa trên loại khối u và phương pháp điều trị.</p>
+                            <a href="{{ url_for('survival_analysis') }}" class="btn btn-primary">Xem Phân Tích</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa fa-exchange-alt fa-3x text-primary mb-3"></i>
+                            <h4 class="card-title">So Sánh Dự Đoán</h4>
+                            <p class="card-text">So sánh kết quả dự đoán giữa các bệnh nhân hoặc các phương pháp điều trị khác nhau.</p>
+                            <a href="{{ url_for('compare_predictions') }}" class="btn btn-primary">So Sánh</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa fa-search fa-3x text-primary mb-3"></i>
+                            <h4 class="card-title">Tìm Kiếm Bệnh Nhân</h4>
+                            <p class="card-text">Tìm kiếm thông tin chi tiết về bệnh nhân trong cơ sở dữ liệu.</p>
+                            <a href="{{ url_for('search_patient') }}" class="btn btn-primary">Tìm Kiếm</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Biểu đồ phân phối cấp độ khối u
+    document.addEventListener('DOMContentLoaded', function() {
+        const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+        const gradeData = {
+            labels: [{% for grade in grade_stats.keys() %}'{{ grade }}',{% endfor %}],
+            datasets: [{
+                label: 'Số lượng bệnh nhân',
+                data: [{% for count in grade_stats.values() %}{{ count }},{% endfor %}],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                ],
+                borderWidth: 1
+            }]
+        };
+        
+        new Chart(gradeCtx, {
+            type: 'pie',
+            data: gradeData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Phân Phối Cấp Độ Khối U'
+                    }
+                }
+            }
+        });
+        
+        // Biểu đồ phân phối độ tuổi
+        const ageCtx = document.getElementById('ageChart').getContext('2d');
+        const ageData = {
+            labels: [{% for age_range in age_ranges.keys() %}'{{ age_range }}',{% endfor %}],
+            datasets: [{
+                label: 'Số lượng bệnh nhân',
+                data: [{% for count in age_ranges.values() %}{{ count }},{% endfor %}],
+                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        };
+        
+        new Chart(ageCtx, {
+            type: 'bar',
+            data: ageData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Phân Phối Độ Tuổi'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Số lượng bệnh nhân'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Nhóm tuổi'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

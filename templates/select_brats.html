@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Chọn Dữ Liệu BraTS - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Chọn Dữ Liệu BraTS{% endblock %}
+{% block hero_subtitle %}Lựa chọn dữ liệu có sẵn từ bộ dữ liệu BraTS để thực hiện phân đoạn{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0"><i class="fas fa-database me-2"></i>Dữ Liệu BraTS</h3>
+                    <div>
+                        <a href="{{ url_for('upload_and_predict') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-upload me-2"></i>Tải lên ảnh MRI
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Giới thiệu -->
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="alert-heading">Về dữ liệu BraTS</h5>
+                            <p class="mb-0">Brain Tumor Segmentation (BraTS) là bộ dữ liệu chuẩn cho phân đoạn khối u não. Bộ dữ liệu này bao gồm các ảnh MRI đã được chú thích bởi các chuyên gia. Bạn có thể chọn một trong các bệnh nhân dưới đây để thực hiện phân đoạn.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if patients|length > 0 %}
+                    <!-- Bộ lọc -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Bộ lọc</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Tìm kiếm</span>
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Nhập ID bệnh nhân...">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <select id="gradeFilter" class="form-select">
+                                        <option value="all">Tất cả cấp độ</option>
+                                        <option value="HGG">HGG</option>
+                                        <option value="LGG">LGG</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                                        <i class="fas fa-sync-alt me-2"></i>Đặt lại
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Danh sách bệnh nhân -->
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="patientsTable">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>ID Bệnh Nhân</th>
+                                    <th>Đường Dẫn FLAIR</th>
+                                    <th>Đường Dẫn T1CE</th>
+                                    <th>Cấp Độ</th>
+                                    <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients %}
+                                <tr class="patient-row" data-id="{{ patient.id }}">
+                                    <td>{{ patient.id }}</td>
+                                    <td class="text-truncate" style="max-width: 200px;" title="{{ patient.flair_path }}">
+                                        {{ patient.flair_path }}
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 200px;" title="{{ patient.t1ce_path }}">
+                                        {{ patient.t1ce_path }}
+                                    </td>
+                                    <td class="grade-cell">
+                                        {% set grade = 'Unknown' %}
+                                        {% if patient.id.startswith('BraTS20') %}
+                                            {% for p in patients_db if p.brats20id == patient.id %}
+                                                {% set grade = p.grade %}
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                        {% if grade == 'HGG' %}
+                                            <span class="badge bg-danger">HGG</span>
+                                        {% elif grade == 'LGG' %}
+                                            <span class="badge bg-warning text-dark">LGG</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Không xác định</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm" 
+                                                onclick="openModal('{{ patient.id }}', '{{ patient.flair_path }}', '{{ patient.t1ce_path }}')">
+                                            <i class="fas fa-brain me-1"></i>Chọn
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Phân trang nếu có nhiều dữ liệu -->
+                    {% if patients|length > 20 %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <!-- Không có dữ liệu -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-database fa-5x text-muted"></i>
+                        </div>
+                        <h4 class="text-muted mb-3">Không tìm thấy dữ liệu BraTS</h4>
+                        <p>Không tìm thấy dữ liệu BraTS trong thư mục đã cấu hình.</p>
+                        <div class="alert alert-warning mt-3 mx-auto" style="max-width: 600px;">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Các nguyên nhân có thể:</h5>
+                            <ul class="mb-0 text-start">
+                                <li>Đường dẫn đến thư mục BraTS không đúng</li>
+                                <li>Thư mục BraTS không chứa dữ liệu hoặc cấu trúc không đúng</li>
+                                <li>Không có quyền truy cập vào thư mục</li>
+                            </ul>
+                        </div>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-home me-2"></i>Về Trang Chủ
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chọn lát cắt -->
+<div class="modal fade" id="sliceModal" tabindex="-1" aria-labelledby="sliceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="sliceModalLabel">Chọn lát cắt cho dự đoán</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('predict_brats') }}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="brats_id" name="brats_id">
+                    <input type="hidden" id="flair_path" name="flair_path">
+                    <input type="hidden" id="t1ce_path" name="t1ce_path">
+                    
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="patientInfo">Chọn lát cắt cho bệnh nhân</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="slice_index" class="form-label">Chọn lát cắt (0-155)</label>
+                            <input type="range" class="form-range" min="0" max="155" step="1" 
+                                   value="60" id="slice_index" name="slice_index" oninput="updateSliceValue()">
+                            <div class="text-center" id="slice_value">Lát cắt: 60</div>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="notes" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Nhập ghi chú về ca bệnh hoặc dự đoán này (không bắt buộc)"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-brain me-2"></i>Thực hiện phân đoạn
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Biến để lưu trữ modal
+    let sliceModal;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo modal
+        sliceModal = new bootstrap.Modal(document.getElementById('sliceModal'));
+        
+        // Khởi tạo DataTable nếu thư viện được tải
+        if (typeof $.fn.DataTable !== 'undefined') {
+            $('#patientsTable').DataTable({
+                "order": [[0, "asc"]], // Sắp xếp theo ID
+                "language": {
+                    "lengthMenu": "Hiển thị _MENU_ bệnh nhân",
+                    "zeroRecords": "Không tìm thấy bệnh nhân nào",
+                    "info": "Trang _PAGE_ / _PAGES_",
+                    "infoEmpty": "Không có dữ liệu",
+                    "infoFiltered": "(lọc từ _MAX_ bệnh nhân)",
+                    "search": "Tìm kiếm:",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Sau",
+                        "previous": "Trước"
+                    }
+                }
+            });
+        } else {
+            // Nếu không có DataTable, sử dụng lọc tự tạo
+            setupCustomFilters();
+        }
+    });
+    
+    // Mở modal chọn lát cắt
+    function openModal(bratsId, flairPath, t1cePath) {
+        document.getElementById('brats_id').value = bratsId;
+        document.getElementById('flair_path').value = flairPath;
+        document.getElementById('t1ce_path').value = t1cePath;
+        document.getElementById('patientInfo').textContent = `Chọn lát cắt cho bệnh nhân ${bratsId}`;
+        sliceModal.show();
+    }
+    
+    // Cập nhật giá trị lát cắt
+    function updateSliceValue() {
+        var sliceIndex = document.getElementById('slice_index').value;
+        document.getElementById('slice_value').innerHTML = 'Lát cắt: ' + sliceIndex;
+    }
+    
+    // Thiết lập bộ lọc tùy chỉnh
+    function setupCustomFilters() {
+        const searchInput = document.getElementById('searchInput');
+        const gradeFilter = document.getElementById('gradeFilter');
+        const rows = document.querySelectorAll('.patient-row');
+        
+        searchInput.addEventListener('input', filterTable);
+        gradeFilter.addEventListener('change', filterTable);
+        
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const gradeValue = gradeFilter.value;
+            
+            rows.forEach(row => {
+                const id = row.querySelector('td').textContent.toLowerCase();
+                const gradeCell = row.querySelector('.grade-cell');
+                const grade = gradeCell.textContent.trim();
+                
+                let matchesSearch = id.includes(searchTerm);
+                let matchesGrade = gradeValue === 'all' || 
+                                  (gradeValue === 'HGG' && grade.includes('HGG')) || 
+                                  (gradeValue === 'LGG' && grade.includes('LGG'));
+                
+                row.style.display = (matchesSearch && matchesGrade) ? '' : 'none';
+            });
+        }
+    }
+    
+    // Đặt lại bộ lọc
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('gradeFilter').value = 'all';
+        
+        if (typeof $.fn.DataTable !== 'undefined') {
+            // Nếu sử dụng DataTable
+            $('#patientsTable').DataTable().search('').columns().search('').draw();
+        } else {
+            // Nếu sử dụng bộ lọc tùy chỉnh
+            const rows = document.querySelectorAll('.patient-row');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+        }
+    }
+</script>
+{% endblock %}

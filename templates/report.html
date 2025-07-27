@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Báo Cáo Kết Quả Phân Đoạn | Hệ Thống Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Báo Cáo Y Khoa{% endblock %}
+{% block hero_subtitle %}Kết quả phân đoạn khối u não{% endblock %}
+
+{% block extra_head %}
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        body {
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .report-header {
+            border-bottom: 1px solid #000;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        
+        .report-section {
+            margin-bottom: 20px;
+        }
+        
+        .report-image {
+            max-width: 100%;
+            height: auto;
+        }
+    }
+    
+    .report-section {
+        margin-bottom: 30px;
+    }
+    
+    .report-header {
+        margin-bottom: 30px;
+    }
+    
+    .report-footer {
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+        margin-top: 40px;
+    }
+    
+    .tumor-label {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .signature-line {
+        width: 200px;
+        border-top: 1px solid #000;
+        margin-top: 50px;
+        display: inline-block;
+    }
+
+    @media (max-width: 767.98px) {
+        .border-sm-bottom {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mb-5">
+    <!-- Nút in báo cáo - chỉ hiển thị trên màn hình -->
+    <div class="row mb-4 no-print">
+        <div class="col-12 text-end">
+            <button onclick="window.print();" class="btn btn-primary">
+                <i class="fa fa-print me-2"></i>In Báo Cáo
+            </button>
+            <a href="{{ url_for('view_prediction', prediction_id=prediction.id) }}" class="btn btn-secondary ms-2">
+                <i class="fa fa-arrow-left me-2"></i>Quay Lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Tiêu đề báo cáo -->
+    <div class="row report-header">
+        <div class="col-md-6">
+            <h2 class="mb-0">BÁO CÁO PHÂN ĐOẠN KHỐI U NÃO</h2>
+            <p class="text-muted">Mã báo cáo: BT-{{ prediction.id|string|truncate(8, True, '') }}</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <h4>Ngày báo cáo: {{ report_date }}</h4>
+            <p class="mb-0">Thời gian thực hiện: {{ prediction.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+    </div>
+
+    <!-- Thông tin bệnh nhân -->
+    <div class="row report-section">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">THÔNG TIN BỆNH NHÂN</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if patient %}
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Mã bệnh nhân:</strong> {{ patient.brats20id }}</p>
+                            <p class="mb-2"><strong>Độ tuổi:</strong> {{ patient.age|int if patient.age else 'Không có thông tin' }}</p>
+                            <p class="mb-2"><strong>Phương pháp phẫu thuật:</strong> {{ patient.extent_of_resection if patient.extent_of_resection else 'Không có thông tin' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Cấp độ khối u:</strong> <span class="badge {% if patient.grade == 'HGG' %}bg-danger{% else %}bg-warning{% endif %}">{{ patient.grade if patient.grade else 'Không xác định' }}</span></p>
+                            <p class="mb-2"><strong>Thời gian sống còn:</strong> {{ patient.survival_days if patient.survival_days else 'Không có thông tin' }} ngày</p>
+                            <p class="mb-2"><strong>File/Tệp dữ liệu:</strong> {{ prediction.filename }}</p>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <p class="mb-2"><strong>Mã bệnh nhân:</strong> {{ prediction.brats_id }}</p>
+                            <p class="mb-2"><strong>File/Tệp dữ liệu:</strong> {{ prediction.filename }}</p>
+                            <p class="text-muted">Không có thông tin chi tiết về bệnh nhân trong cơ sở dữ liệu.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kết quả phân đoạn -->
+    <div class="row report-section">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">KẾT QUẢ PHÂN ĐOẠN KHỐI U NÃO</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-2"><strong>Lát cắt đã phân tích:</strong> {{ prediction.slice_index }}</p>
+                    <div class="my-4">
+                        <img src="{{ url_for('static', filename=image) }}" class="img-fluid rounded border report-image" alt="Kết quả phân đoạn">
+                    </div>
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-md-8">
+                            <h5>Chú thích:</h5>
+                            <div class="d-flex flex-wrap justify-content-center mt-3">
+                                <div class="mx-3 mb-2">
+                                    <span class="tumor-label bg-dark"></span>
+                                    <span>Background (nền)</span>
+                                </div>
+                                <div class="mx-3 mb-2">
+                                    <span class="tumor-label bg-danger"></span>
+                                    <span>NCR/NET (vùng hoại tử)</span>
+                                </div>
+                                <div class="mx-3 mb-2">
+                                    <span class="tumor-label bg-warning"></span>
+                                    <span>ED (phù não)</span>
+                                </div>
+                                <div class="mx-3 mb-2">
+                                    <span class="tumor-label bg-primary"></span>
+                                    <span>ET (khối u tăng cường)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân tích và nhận xét -->
+    <div class="row report-section">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">PHÂN TÍCH VÀ NHẬN XÉT</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Ghi chú của bác sĩ:</h5>
+                            <div class="p-3 border rounded bg-light">
+                                {% if prediction.notes %}
+                                <p>{{ prediction.notes }}</p>
+                                {% else %}
+                                <p class="text-muted">Không có ghi chú.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Kết luận chung:</h5>
+                            <div class="p-3 border rounded">
+                                <p>Dựa trên kết quả phân đoạn khối u não, có thể xác định được các thành phần khối u như sau:</p>
+                                <ul>
+                                    <li>Vùng hoại tử/không tăng cường (NCR/NET) được hiển thị màu đỏ</li>
+                                    <li>Vùng phù não (ED) được hiển thị màu vàng</li>
+                                    <li>Vùng khối u tăng cường (ET) được hiển thị màu xanh</li>
+                                </ul>
+                                <p>Kết quả phân đoạn này được thực hiện bởi mô hình Deep Learning, và nên được sử dụng như một công cụ hỗ trợ cho bác sĩ trong quá trình chẩn đoán và điều trị.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khuyến nghị -->
+    <div class="row report-section">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">KHUYẾN NGHỊ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ol>
+                                <li>Nên kết hợp kết quả phân đoạn này với các kết quả chẩn đoán hình ảnh khác.</li>
+                                <li>Tham khảo ý kiến của bác sĩ chuyên khoa để có đánh giá toàn diện.</li>
+                                <li>Xem xét thực hiện phân tích trên nhiều lát cắt khác nhau để có cái nhìn tổng thể về khối u.</li>
+                                <li>Tiến hành theo dõi định kỳ để đánh giá sự tiến triển của khối u.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chữ ký -->
+    <div class="row report-footer">
+        <div class="col-md-6 mb-4 mb-md-0 border-sm-bottom border-md-0">
+            <div class="text-center">
+                <p>Người thực hiện</p>
+                <div class="signature-line"></div>
+                <p class="mt-2">Bác sĩ ký tên</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-center">
+                <p>Xác nhận</p>
+                <div class="signature-line"></div>
+                <p class="mt-2">Trưởng khoa</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin hệ thống -->
+    <div class="row mt-5">
+        <div class="col-12 text-center text-muted">
+            <p><small>Báo cáo được tạo bởi: Hệ Thống Phân Đoạn Khối U Não - BrainTumorApp</small></p>
+            <p><small>ID Dự đoán: {{ prediction.id }}</small></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+</script>
+{% endblock %}

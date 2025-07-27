@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Tài Liệu Tham Khảo - Phân Đoạn Khối U Não{% endblock %}
+
+{% block hero_title %}Tài Liệu Tham Khảo{% endblock %}
+
+{% block hero_subtitle %}Các nghiên cứu và phương pháp phân đoạn khối u não từ ảnh MRI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+        <h6 class="section-title bg-white text-center text-primary px-3">Research Papers</h6>
+        <h1 class="mb-5">Nghiên Cứu Về Phân Đoạn Khối U Não</h1>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Nghiên cứu 1 -->
+        <div class="col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="package-item">
+                <div class="overflow-hidden">
+                    <img class="img-fluid" src="{{ url_for('static', filename='img/research1.jpg') }}" alt="WFL-Based 3D U-Net">
+                </div>
+                <div class="d-flex border-bottom">
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-calendar-alt text-primary me-2"></i>Oct 2022</small>
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-user text-primary me-2"></i>Shomirov et al.</small>
+                    <small class="flex-fill text-center py-2"><i class="fa fa-file text-primary me-2"></i>Journal Article</small>
+                </div>
+                <div class="p-4">
+                    <h3 class="mb-3">Brain Tumor Segmentation of HGG and LGG MRI Images Using WFL-Based 3D U-Net</h3>
+                    <p class="mb-4">Nghiên cứu này đề xuất một phương pháp cải tiến dựa trên mô hình 3D U-Net với hàm mất mát Weighted Focal Loss (WFL) để giải quyết vấn đề mất cân bằng giữa các lớp trong phân đoạn khối u não từ ảnh MRI.</p>
+                    <p><strong>Kết quả:</strong> Đạt được điểm Dice score cho TC, WT và ET lần lượt là 0.830, 0.913, 0.815 đối với khối u HGG và 0.731, 0.775, 0.685 đối với khối u LGG trên tập dữ liệu BraTS 2019.</p>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Giải quyết vấn đề mất cân bằng giữa các lớp</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Cải thiện dự đoán phân đoạn khối u</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Xử lý suy giảm pixel trong quá trình đào tạo</p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <a href="https://doi.org/10.4236/jbise.2022.1510022" target="_blank" class="btn btn-primary py-2 px-4">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nghiên cứu 2 -->
+        <div class="col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+            <div class="package-item">
+                <div class="overflow-hidden">
+                    <img class="img-fluid" src="{{ url_for('static', filename='img/research2.jpg') }}" alt="U-Net Architecture">
+                </div>
+                <div class="d-flex border-bottom">
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-calendar-alt text-primary me-2"></i>May 2015</small>
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-user text-primary me-2"></i>Ronneberger et al.</small>
+                    <small class="flex-fill text-center py-2"><i class="fa fa-file text-primary me-2"></i>Conference Paper</small>
+                </div>
+                <div class="p-4">
+                    <h3 class="mb-3">U-Net: Convolutional Networks for Biomedical Image Segmentation</h3>
+                    <p class="mb-4">Nghiên cứu nền tảng giới thiệu kiến trúc U-Net, một mạng tích chập được thiết kế đặc biệt cho phân đoạn ảnh y sinh. Kiến trúc này đã trở thành nền tảng cho nhiều nghiên cứu về phân đoạn ảnh y tế, bao gồm cả phân đoạn khối u não.</p>
+                    <p><strong>Đóng góp:</strong> Mô hình sử dụng kết nối skip-connection giữa đường encoder và decoder, cho phép kết hợp thông tin cục bộ và toàn cục để cải thiện độ chính xác phân đoạn.</p>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Kiến trúc encoder-decoder</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Kết nối skip-connection</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Hiệu quả với dữ liệu đào tạo nhỏ</p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <a href="https://doi.org/10.1007/978-3-319-24574-4_28" target="_blank" class="btn btn-primary py-2 px-4">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nghiên cứu 3 -->
+        <div class="col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+            <div class="package-item">
+                <div class="overflow-hidden">
+                    <img class="img-fluid" src="{{ url_for('static', filename='img/research3.jpg') }}" alt="3D U-Net">
+                </div>
+                <div class="d-flex border-bottom">
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-calendar-alt text-primary me-2"></i>Oct 2016</small>
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-user text-primary me-2"></i>Çiçek et al.</small>
+                    <small class="flex-fill text-center py-2"><i class="fa fa-file text-primary me-2"></i>Conference Paper</small>
+                </div>
+                <div class="p-4">
+                    <h3 class="mb-3">3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation</h3>
+                    <p class="mb-4">Mở rộng kiến trúc U-Net từ 2D sang 3D để phân đoạn ảnh thể tích. Mô hình này đặc biệt phù hợp với dữ liệu y tế 3D như MRI não, cho phép phân tích các cấu trúc 3D phức tạp.</p>
+                    <p><strong>Ứng dụng:</strong> Áp dụng hiệu quả trong phân đoạn khối u não từ ảnh MRI 3D, cung cấp thông tin không gian ba chiều quan trọng về hình dạng và kích thước khối u.</p>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Mở rộng U-Net sang 3D</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Phân đoạn ảnh thể tích hiệu quả</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Học từ dữ liệu chú thích thưa thớt</p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <a href="https://doi.org/10.1007/978-3-319-46723-8_49" target="_blank" class="btn btn-primary py-2 px-4">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dữ liệu BraTS Challenge -->
+        <div class="col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+            <div class="package-item">
+                <div class="overflow-hidden">
+                    <img class="img-fluid" src="{{ url_for('static', filename='img/brats-dataset.jpg') }}" alt="BraTS Dataset">
+                </div>
+                <div class="d-flex border-bottom">
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-calendar-alt text-primary me-2"></i>2019-2020</small>
+                    <small class="flex-fill text-center border-end py-2"><i class="fa fa-database text-primary me-2"></i>BraTS Challenge</small>
+                    <small class="flex-fill text-center py-2"><i class="fa fa-chart-bar text-primary me-2"></i>Dataset</small>
+                </div>
+                <div class="p-4">
+                    <h3 class="mb-3">BraTS: Brain Tumor Segmentation Challenge</h3>
+                    <p class="mb-4">BraTS là một cuộc thi và bộ dữ liệu chuẩn để đánh giá các thuật toán phân đoạn khối u não. Dữ liệu bao gồm các ảnh MRI đa phương thức (T1, T1ce, T2, FLAIR) từ bệnh nhân có khối u não cấp độ thấp (LGG) và cao (HGG).</p>
+                    <p><strong>Thành phần dữ liệu:</strong> Mỗi bộ dữ liệu bệnh nhân có 4 phương thức MRI với kích thước 240×240×155 voxel và các chú thích được đánh dấu thủ công có 4 lớp: không được gắn nhãn, u hoại tử, phù do khối u và u tăng cường.</p>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Ảnh MRI đa phương thức</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Chuẩn hóa dữ liệu</p>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <p class="mb-0"><i class="fa fa-check-circle text-primary me-2"></i>Chú thích chuyên nghiệp</p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <a href="https://www.med.upenn.edu/cbica/brats2020/" target="_blank" class="btn btn-primary py-2 px-4">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tổng quan về các phương pháp -->
+    <div class="row mt-5">
+        <div class="col-12 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="bg-white rounded shadow p-4">
+                <h4 class="mb-4 text-primary">So sánh các phương pháp phân đoạn khối u não</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th>Phương pháp</th>
+                                <th>Năm</th>
+                                <th>Dice Score (TC)</th>
+                                <th>Dice Score (WT)</th>
+                                <th>Dice Score (ET)</th>
+                                <th>Ưu điểm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Weighted Focal Loss-Based 3D U-Net</td>
+                                <td>2022</td>
+                                <td>0.830 (HGG)</td>
+                                <td>0.913 (HGG)</td>
+                                <td>0.815 (HGG)</td>
+                                <td>Giải quyết vấn đề mất cân bằng dữ liệu</td>
+                            </tr>
+                            <tr>
+                                <td>MIRAU-Net</td>
+                                <td>2022</td>
+                                <td>0.879</td>
+                                <td>0.885</td>
+                                <td>0.818</td>
+                                <td>Kết hợp mô-đun Inception và Residual</td>
+                            </tr>
+                            <tr>
+                                <td>TransBTS</td>
+                                <td>2021</td>
+                                <td>0.847</td>
+                                <td>0.904</td>
+                                <td>0.802</td>
+                                <td>Kết hợp Transformer và CNN</td>
+                            </tr>
+                            <tr>
+                                <td>U-Net AE</td>
+                                <td>2020</td>
+                                <td>0.881</td>
+                                <td>0.889</td>
+                                <td>0.852</td>
+                                <td>Mô hình dựa trên Encoder tổng hợp</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mt-3">TC: Tumor Core (lõi u), WT: Whole Tumor (toàn bộ u), ET: Enhancing Tumor (u tăng cường)</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Phần thông tin về công nghệ Deep Learning -->
+    <div class="row g-4 mt-5">
+        <div class="col-12 text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Deep Learning</h6>
+            <h1 class="mb-5">Công Nghệ Sử Dụng Trong Phân Đoạn Khối U Não</h1>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="service-item rounded pt-3">
+                <div class="p-4">
+                    <i class="fa fa-3x fa-brain text-primary mb-4"></i>
+                    <h5>Mô hình U-Net</h5>
+                    <p>Kiến trúc encoder-decoder với các kết nối skip-connection cho phép kết hợp thông tin cục bộ và ngữ cảnh toàn cục để phân đoạn ảnh y sinh học với độ chính xác cao.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+            <div class="service-item rounded pt-3">
+                <div class="p-4">
+                    <i class="fa fa-3x fa-chart-line text-primary mb-4"></i>
+                    <h5>Hàm mất mát</h5>
+                    <p>Các hàm mất mát tiên tiến như Weighted Focal Loss (WFL), Dice Loss, và Cross-Entropy giúp giải quyết vấn đề mất cân bằng dữ liệu trong phân đoạn khối u não.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+            <div class="service-item rounded pt-3">
+                <div class="p-4">
+                    <i class="fa fa-3x fa-cube text-primary mb-4"></i>
+                    <h5>Phân tích 3D</h5>
+                    <p>Các mô hình 3D U-Net cho phép phân tích toàn bộ thể tích ảnh MRI 3D, cung cấp thông tin không gian quan trọng về hình dạng và kích thước khối u.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

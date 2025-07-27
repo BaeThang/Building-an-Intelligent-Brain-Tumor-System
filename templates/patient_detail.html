@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}Chi Tiết Bệnh Nhân {{ patient.brats20id }} - BrainTumorApp{% endblock %}
+
+{% block hero_title %}Thông Tin Bệnh Nhân{% endblock %}
+{% block hero_subtitle %}Xem thông tin chi tiết và lịch sử dự đoán của bệnh nhân{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="bg-white shadow rounded p-4 p-sm-5">
+                <!-- Nút điều hướng -->
+                <div class="mb-4">
+                    <a href="{{ url_for('list_patients') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+                    </a>
+                </div>
+                
+                <!-- Thông tin chính -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 text-center mb-4 mb-md-0">
+                            <div class="d-inline-flex justify-content-center align-items-center bg-light rounded-circle mb-3" 
+                                 style="width: 100px; height: 100px;">
+                                <i class="fas fa-user-alt fa-3x text-primary"></i>
+                            </div>
+                            <h4 class="mt-2">{{ patient.brats20id }}</h4>
+                            {% if patient.grade %}
+                                {% if patient.grade == 'HGG' %}
+                                    <span class="badge bg-danger py-2 px-3">High-Grade Glioma (HGG)</span>
+                                {% elif patient.grade == 'LGG' %}
+                                    <span class="badge bg-warning text-dark py-2 px-3">Low-Grade Glioma (LGG)</span>
+                                {% else %}
+                                    <span class="badge bg-secondary py-2 px-3">{{ patient.grade }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-secondary py-2 px-3">Không xác định</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin chi tiết</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="mb-3">
+                                            <p class="text-muted mb-1">Tuổi</p>
+                                            <h5>{{ patient.age if patient.age else 'Không có thông tin' }}</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="mb-3">
+                                            <p class="text-muted mb-1">Ngày sống còn</p>
+                                            <h5>{{ patient.survival_days if patient.survival_days else 'Không có thông tin' }}</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <div class="mb-3">
+                                            <p class="text-muted mb-1">Mức độ cắt bỏ</p>
+                                            <h5>{{ patient.extent_of_resection if patient.extent_of_resection else 'Không có thông tin' }}</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if mapping %}
+                                <hr>
+                                <div class="mt-3">
+                                    <h6 class="text-muted mb-2">Mã ID liên quan:</h6>
+                                    <div class="list-group">
+                                        {% if mapping.brats17id %}
+                                        <div class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">BraTS 2017</h6>
+                                            </div>
+                                            <p class="mb-1 text-primary">{{ mapping.brats17id }}</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if mapping.brats18id %}
+                                        <div class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">BraTS 2018</h6>
+                                            </div>
+                                            <p class="mb-1 text-primary">{{ mapping.brats18id }}</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if mapping.brats19id %}
+                                        <div class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">BraTS 2019</h6>
+                                            </div>
+                                            <p class="mb-1 text-primary">{{ mapping.brats19id }}</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if mapping.tcga_id %}
+                                        <div class="list-group-item list-group-item-action flex-column align-items-start">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">TCGA/TCIA</h6>
+                                            </div>
+                                            <p class="mb-1 text-primary">{{ mapping.tcga_id }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if has_mri_files %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Ảnh MRI</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label for="sliceIndex">Lát cắt (0-{{ max_slice }}):</label>
+                <input type="range" id="sliceIndex" class="form-range" min="0" max="{{ max_slice }}" value="{{ max_slice // 2 }}" onchange="updatePatientSlices()">
+                <div class="text-center" id="sliceValue">Lát cắt: {{ max_slice // 2 }}</div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">FLAIR</div>
+                    <div class="card-body text-center p-0">
+                        <div id="flair_preview" class="preview-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">T1CE</div>
+                    <div class="card-body text-center p-0">
+                        <div id="t1ce_preview" class="preview-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">Segmentation</div>
+                    <div class="card-body text-center p-0">
+                        <div id="seg_preview" class="preview-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .preview-container {
+        height: 200px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .preview-container img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        updatePatientSlices();
+        
+        // Cập nhật giá trị lát cắt khi thay đổi
+        document.getElementById('sliceIndex').addEventListener('input', function() {
+            var sliceIndex = this.value;
+            document.getElementById('sliceValue').textContent = 'Lát cắt: ' + sliceIndex;
+        });
+    });
+    
+    let isLoading = {
+        'flair': false,
+        't1ce': false,
+        'seg': false
+    };
+    
+    function updatePatientSlices() {
+        const sliceIndex = document.getElementById('sliceIndex').value;
+        const brats_id = "{{ patient.brats20id }}";
+        
+        loadPatientSlice('flair', brats_id, sliceIndex);
+        loadPatientSlice('t1ce', brats_id, sliceIndex);
+        loadPatientSlice('seg', brats_id, sliceIndex);
+    }
+    
+    function loadPatientSlice(fileType, brats_id, sliceIndex) {
+        const previewDiv = document.getElementById(fileType + '_preview');
+        
+        // Nếu đang xử lý, bỏ qua
+        if (isLoading[fileType]) {
+            return;
+        }
+        
+        // Đánh dấu đang tải
+        isLoading[fileType] = true;
+        
+        // Hiển thị spinner
+        previewDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        
+        // Tạo form data
+        const formData = new FormData();
+        formData.append('brats_id', brats_id);
+        formData.append('file_type', fileType);
+        formData.append('slice_index', sliceIndex);
+        
+        // Timeout để hủy nếu quá lâu
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+        // Gửi request
+        fetch('/patient-slice-data', {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal
+        })
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const img = new Image();
+                img.onload = function() {
+                    previewDiv.innerHTML = '';
+                    previewDiv.appendChild(img);
+                    img.classList.add('img-fluid');
+                    img.alt = fileType.toUpperCase();
+                };
+                img.onerror = function() {
+                    previewDiv.innerHTML = '<div class="text-danger">Không thể tải hình ảnh</div>';
+                };
+                // Sử dụng trực tiếp dữ liệu base64
+                img.src = data.image_data;
+            } else {
+                previewDiv.innerHTML = '<div class="text-danger">' + (data.error || 'Lỗi không xác định') + '</div>';
+            }
+        })
+        .catch(error => {
+            if (error.name === 'AbortError') {
+                previewDiv.innerHTML = '<div class="text-danger">Yêu cầu bị hủy do quá thời gian</div>';
+            } else {
+                previewDiv.innerHTML = '<div class="text-danger">Lỗi: ' + error.message + '</div>';
+            }
+        })
+        .finally(() => {
+            isLoading[fileType] = false;
+        });
+    }
+</script>
+{% endif %}
+                <!-- Lịch sử dự đoán -->
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>Lịch sử dự đoán
+                            <span class="badge bg-light text-dark ms-2">{{ predictions|length }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if predictions|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Thời gian</th>
+                                            <th>Tên file</th>
+                                            <th>Lát cắt</th>
+                                            <th>Ghi chú</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for prediction in predictions %}
+                                        <tr>
+                                            <td>{{ prediction.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                            <td>{{ prediction.filename }}</td>
+                                            <td>{{ prediction.slice_index }}</td>
+                                            <td>
+                                                {% if prediction.notes %}
+                                                    {{ prediction.notes|truncate(30) }}
+                                                {% else %}
+                                                    <span class="text-muted">Không có</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('view_prediction', prediction_id=prediction.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye me-1"></i>Xem
+                                                </a>
+                                                <a href="{{ url_for('generate_report', prediction_id=prediction.id) }}" class="btn btn-sm btn-outline-info" target="_blank">
+                                                    <i class="fas fa-file-pdf me-1"></i>Báo cáo
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-search fa-3x text-muted"></i>
+                                </div>
+                                <p>Không có dự đoán nào cho bệnh nhân này.</p>
+                                <div class="mt-3">
+                                    <a href="{{ url_for('upload_and_predict') }}" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Tạo dự đoán mới
+                                    </a>
+                                    <a href="{{ url_for('select_brats_data') }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-database me-2"></i>Chọn từ BraTS
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Thẻ thông tin và thống kê -->
+                <div class="row mt-4">
+                    {% if patient.grade == 'HGG' or patient.grade == 'LGG' %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-{{ 'danger' if patient.grade == 'HGG' else 'warning' }}">
+                            <div class="card-header bg-{{ 'danger' if patient.grade == 'HGG' else 'warning' }} text-{{ 'white' if patient.grade == 'HGG' else 'dark' }}">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Thông tin {{ patient.grade }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if patient.grade == 'HGG' %}
+                                <p>High-Grade Glioma (HGG) là một loại u não tiến triển nhanh, có độ ác tính cao. Các loại HGG bao gồm u nguyên bào đệm đa hình độ III và u nguyên bào đệm đa hình độ IV (u nguyên bào võng mạc).</p>
+                                <ul>
+                                    <li>Đặc điểm: Phát triển nhanh, xâm lấn mạnh</li>
+                                    <li>Tiên lượng: Thường không thuận lợi</li>
+                                    <li>Điều trị: Phẫu thuật, xạ trị, hóa trị</li>
+                                </ul>
+                                {% else %}
+                                <p>Low-Grade Glioma (LGG) là loại u não tiến triển chậm, có độ ác tính thấp. Các loại LGG bao gồm u nguyên bào đệm độ I và độ II.</p>
+                                <ul>
+                                    <li>Đặc điểm: Phát triển chậm, ít xâm lấn</li>
+                                    <li>Tiên lượng: Thường tốt hơn so với HGG</li>
+                                    <li>Điều trị: Phẫu thuật, theo dõi, xạ trị trong một số trường hợp</li>
+                                </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="col-md-{{ '6' if patient.grade == 'HGG' or patient.grade == 'LGG' else '12' }} mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tasks me-2"></i>Thao tác nhanh
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-6 mb-3">
+                                        <a href="{{ url_for('upload_and_predict') }}" class="card bg-light text-center p-3 h-100 text-decoration-none">
+                                            <div class="mb-2">
+                                                <i class="fas fa-upload fa-2x text-primary"></i>
+                                            </div>
+                                            <h6 class="text-primary">Tải lên ảnh MRI</h6>
+                                            <small class="text-muted">Tạo dự đoán mới cho bệnh nhân</small>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <a href="{{ url_for('select_brats_data') }}" class="card bg-light text-center p-3 h-100 text-decoration-none">
+                                            <div class="mb-2">
+                                                <i class="fas fa-database fa-2x text-info"></i>
+                                            </div>
+                                            <h6 class="text-info">Chọn từ dữ liệu BraTS</h6>
+                                            <small class="text-muted">Sử dụng dữ liệu có sẵn trong BraTS</small>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <a href="{{ url_for('survival_analysis') }}" class="card bg-light text-center p-3 h-100 text-decoration-none">
+                                            <div class="mb-2">
+                                                <i class="fas fa-heartbeat fa-2x text-danger"></i>
+                                            </div>
+                                            <h6 class="text-danger">Phân tích sống còn</h6>
+                                            <small class="text-muted">Xem phân tích dữ liệu sống còn</small>
+                                        </a>
+                                    </div>
+                                    <div class="col-sm-6 mb-3">
+                                        <a href="{{ url_for('statistics') }}" class="card bg-light text-center p-3 h-100 text-decoration-none">
+                                            <div class="mb-2">
+                                                <i class="fas fa-chart-pie fa-2x text-success"></i>
+                                            </div>
+                                            <h6 class="text-success">Thống kê tổng quan</h6>
+                                            <small class="text-muted">Xem số liệu thống kê và biểu đồ</small>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hiệu ứng khi tải trang
+        const infoCards = document.querySelectorAll('.card');
+        
+        infoCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100 * index);
+        });
+    });
+</script>
+{% endblock %}
